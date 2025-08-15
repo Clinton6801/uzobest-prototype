@@ -15,13 +15,31 @@ const tailwindCSS = `
   .animate-fade-in-down {
     animation: fade-in-down 0.5s ease-out forwards;
   }
+
+  /* Custom scrollbar styling for both light and dark modes */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thumb-rounded {
+    scrollbar-color: rgb(156 163 175) transparent; /* For Firefox */
+  }
+  .scrollbar-thumb-rounded::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
+    background-color: rgb(156 163 175);
+    border-radius: 9999px;
+  }
+  .dark .scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
+    background-color: rgb(75 85 99);
+  }
 `;
 
 // --- Reusable Components ---
 
 // Reusable card container for consistent styling
 const Card = ({ children, className = '' }) => (
-  <div className={`bg-white p-6 sm:p-10 rounded-2xl shadow-2xl w-full max-w-lg transition-all duration-500 ease-in-out ${className}`}>
+  <div className={`bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-2xl shadow-2xl w-full max-w-lg transition-colors duration-500 ease-in-out ${className}`}>
     {children}
   </div>
 );
@@ -42,11 +60,11 @@ const CustomAlert = ({ message, isSuccess, onClose }) => {
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <style>{tailwindCSS}</style>
-      <div className="bg-white rounded-3xl p-8 shadow-2xl text-center max-w-sm animate-fade-in-down">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-2xl text-center max-w-sm animate-fade-in-down">
         <div className="flex flex-col items-center">
-          <h3 className="text-xl font-bold text-gray-800 mb-2">{isSuccess ? 'Success!' : 'Error'}</h3>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{isSuccess ? 'Success!' : 'Error'}</h3>
           {icon}
-          <p className="text-lg text-gray-600 mb-4">{message}</p>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">{message}</p>
           <button
             onClick={onClose}
             className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
@@ -92,14 +110,14 @@ const transactionHistory = [
 const AirtimeForm = ({ onSubmit, isLoading }) => (
   <form onSubmit={onSubmit} className="space-y-4">
     <div>
-      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-      <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
+      <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
     </div>
     <div>
-      <label className="block text-sm font-medium text-gray-700">Amount</label>
-      <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
+      <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
     </div>
-    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
       {isLoading ? 'Processing...' : 'Pay for Airtime'}
     </button>
   </form>
@@ -108,24 +126,24 @@ const AirtimeForm = ({ onSubmit, isLoading }) => (
 const DataForm = ({ onSubmit, isLoading }) => (
   <form onSubmit={onSubmit} className="space-y-4">
     <div>
-      <label className="block text-sm font-medium text-gray-700">Network Provider</label>
-      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Network Provider</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
         <option value="">Select network</option>
         {Object.keys(dataPlans).map(provider => (<option key={provider} value={provider}>{provider}</option>))}
       </select>
     </div>
     <div>
-      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-      <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
+      <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
     </div>
     <div>
-      <label className="block text-sm font-medium text-gray-700">Select Plan</label>
-      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Plan</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
         <option value="">Select data plan</option>
         {Object.entries(dataPlans).flatMap(([provider, plans]) => plans.map(plan => (<option key={plan.id} value={plan.id}>{provider} - {plan.text}</option>)))}
       </select>
     </div>
-    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
       {isLoading ? 'Processing...' : 'Pay for Data'}
     </button>
   </form>
@@ -134,21 +152,21 @@ const DataForm = ({ onSubmit, isLoading }) => (
 const ElectricityForm = ({ onSubmit, isLoading }) => (
   <form onSubmit={onSubmit} className="space-y-4">
     <div>
-      <label className="block text-sm font-medium text-gray-700">Distribution Company</label>
-      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Distribution Company</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
         <option value="">Select company</option>
         {electricityCompanies.map(company => (<option key={company} value={company}>{company}</option>))}
       </select>
     </div>
     <div>
-      <label className="block text-sm font-medium text-gray-700">Meter Number</label>
-      <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter meter number" />
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Meter Number</label>
+      <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter meter number" />
     </div>
     <div>
-      <label className="block text-sm font-medium text-gray-700">Amount</label>
-      <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
+      <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
     </div>
-    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
       {isLoading ? 'Processing...' : 'Pay for Electricity'}
     </button>
   </form>
@@ -157,17 +175,17 @@ const ElectricityForm = ({ onSubmit, isLoading }) => (
 const CableTvForm = ({ onSubmit, isLoading }) => (
   <form onSubmit={onSubmit} className="space-y-4">
     <div>
-      <label className="block text-sm font-medium text-gray-700">Provider</label>
-      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Provider</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
         <option value="">Select provider</option>
         {cableTvProviders.map(provider => (<option key={provider} value={provider}>{provider}</option>))}
       </select>
     </div>
     <div>
-      <label className="block text-sm font-medium text-gray-700">Smartcard Number</label>
-      <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter smartcard number" />
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Smartcard Number</label>
+      <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter smartcard number" />
     </div>
-    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
       {isLoading ? 'Processing...' : 'Pay for Cable TV'}
     </button>
   </form>
@@ -194,14 +212,14 @@ const FeedbackForm = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-lg">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Feedback & Suggestions</h3>
-      <p className="text-gray-500 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg transition-colors duration-500 ease-in-out">
+      <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Feedback & Suggestions</h3>
+      <p className="text-gray-500 dark:text-gray-400 mb-4">
         We value your opinion! Please let us know your thoughts.
       </p>
       <form onSubmit={handleFeedbackSubmit} className="space-y-4">
         <div>
-          <label htmlFor="feedback" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Your message
           </label>
           <textarea
@@ -210,14 +228,14 @@ const FeedbackForm = ({ onSubmit, isLoading }) => {
             required
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             placeholder="Type your feedback, questions, or suggestions here..."
           ></textarea>
         </div>
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full px-6 py-3 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+          className={`w-full px-6 py-3 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
         >
           {isLoading ? 'Submitting...' : 'Submit Feedback'}
         </button>
@@ -229,18 +247,18 @@ const FeedbackForm = ({ onSubmit, isLoading }) => {
 
 // Transaction history list component
 const TransactionHistoryList = ({ history }) => (
-  <div className="bg-white rounded-3xl p-6 shadow-lg">
-    <h3 className="text-2xl font-bold text-gray-800 mb-6">Recent Transactions</h3>
-    <div className="space-y-4">
+  <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg transition-colors duration-500 ease-in-out">
+    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Recent Transactions</h3>
+    <div className="space-y-4 scrollbar-thin scrollbar-thumb-rounded max-h-[400px] overflow-y-auto">
       {history.map(transaction => (
-        <div key={transaction.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100">
+        <div key={transaction.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
           <div>
-            <h4 className="font-semibold text-gray-800">{transaction.service}</h4>
-            <p className="text-sm text-gray-500">{transaction.date}</p>
+            <h4 className="font-semibold text-gray-800 dark:text-gray-100">{transaction.service}</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{transaction.date}</p>
           </div>
           <div className="text-right">
-            <p className="font-bold text-gray-900">{transaction.amount}</p>
-            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${transaction.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
+            <p className="font-bold text-gray-900 dark:text-white">{transaction.amount}</p>
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${transaction.status === 'Completed' ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200' : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'}`}>
               {transaction.status}
             </span>
           </div>
@@ -265,36 +283,36 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans antialiased flex items-center justify-center p-4 transition-colors duration-500 ease-in-out">
       <style>{tailwindCSS}</style>
       <Card className="max-w-md">
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             {isLoginView ? 'Sign In' : 'Create an Account'}
           </h2>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             {isLoginView ? 'Enter your credentials' : 'Join our community today!'}
           </p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               placeholder="Enter your username"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
             <input
               type="password"
               required
-              className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="mt-1 block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
           </div>
           <button
@@ -306,18 +324,18 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
         </form>
 
         <div className="text-center mt-4 text-sm">
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             {isLoginView ? "Don't have an account?" : "Already have an account?"}
             <button
               onClick={() => setIsLoginView(!isLoginView)}
-              className="text-blue-600 ml-1 hover:text-blue-800 transition-colors font-medium"
+              className="text-blue-600 dark:text-blue-400 ml-1 hover:text-blue-800 dark:hover:text-blue-200 transition-colors font-medium"
             >
               {isLoginView ? 'Sign Up' : 'Sign In'}
             </button>
           </p>
           <button
             onClick={() => setAppState('homepage')}
-            className="mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="mt-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
           >
             &larr; Back to Home
           </button>
@@ -329,7 +347,7 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
 
 
 // Updated Dashboard Component with service selection, forms, and transaction history
-const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
+const Dashboard = ({ setAppState, loggedInUser, setAlert, isDarkMode, toggleDarkMode }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -394,40 +412,57 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   const DynamicServiceForm = serviceForms[selectedService];
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans transition-colors duration-500 ease-in-out">
       <style>{tailwindCSS}</style>
       {/* Header */}
-      <nav className="bg-white shadow-sm py-4 mb-8">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm py-4 mb-8 transition-colors duration-500 ease-in-out">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-indigo-600">AjalaGSM</h1>
-          <div className="flex items-center space-x-4 relative" ref={profileRef}>
+          <div className="flex items-center space-x-4 relative">
+            {/* Dark Mode Toggle Button */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              aria-label="Toggle Dark Mode"
+            >
+              {isDarkMode ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.364l-1.591 1.591M21 12h-2.25m-.364 6.364l-1.591-1.591M12 18.75V21m-6.364-.364l1.591-1.591M3 12H5.25m-.364-6.364l1.591 1.591M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25c0 5.086 4.164 9.25 9.25 9.25A9.754 9.754 0 0021.752 15.002z" />
+                </svg>
+              )}
+            </button>
             {/* Profile Button */}
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-110"
               aria-label="User Profile Menu"
+              ref={profileRef}
             >
               {firstLetter}
             </button>
             {/* Profile Dropdown Menu */}
             {isProfileMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-10 animate-fade-in-down">
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-xl shadow-lg py-2 z-10 animate-fade-in-down">
                 <button
                   onClick={() => handleProfileAction('Edit Profile')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   Edit Profile
                 </button>
                 <button
                   onClick={() => handleProfileAction('Change Password')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   Change Password
                 </button>
-                <div className="border-t border-gray-200 mt-2 pt-2">
+                <div className="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2">
                   <button
                     onClick={() => setAppState('homepage')}
-                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors"
                   >
                     Logout
                   </button>
@@ -440,7 +475,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
 
       {/* Main Content Area */}
       <main className="container mx-auto px-4 py-8">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-6">Welcome back, {username}!</h2>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 dark:text-white mb-6">Welcome back, {username}!</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Dashboard Section */}
           <div className="lg:col-span-2 space-y-8">
@@ -458,19 +493,19 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
             </div>
 
             {/* Services Grid */}
-            <div className="bg-white rounded-3xl p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">Services</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg transition-colors duration-500 ease-in-out">
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Services</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {services.map(service => (
                   <button
                     key={service.name}
                     onClick={() => setSelectedService(service.name)}
-                    className={`group flex flex-col items-center justify-center p-6 rounded-2xl shadow-md transition-all transform hover:-translate-y-1 ${selectedService === service.name ? 'bg-indigo-100 shadow-xl' : 'bg-gray-100 hover:bg-indigo-50'}`}
+                    className={`group flex flex-col items-center justify-center p-6 rounded-2xl shadow-md transition-all transform hover:-translate-y-1 ${selectedService === service.name ? 'bg-indigo-100 dark:bg-indigo-800 shadow-xl' : 'bg-gray-100 dark:bg-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-900'}`}
                   >
-                    <div className="p-4 bg-white rounded-full group-hover:bg-indigo-100 transition-colors mb-4">
+                    <div className="p-4 bg-white dark:bg-gray-800 rounded-full group-hover:bg-indigo-100 dark:group-hover:bg-indigo-700 transition-colors mb-4">
                       {service.icon}
                     </div>
-                    <span className="text-lg font-semibold text-gray-700">{service.name}</span>
+                    <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">{service.name}</span>
                   </button>
                 ))}
               </div>
@@ -478,19 +513,19 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
 
             {/* Dynamic Form Section */}
             {selectedService && (
-              <div className="bg-white rounded-3xl p-6 shadow-lg">
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg transition-colors duration-500 ease-in-out">
                 <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {selectedService} Payment
                   </h2>
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 dark:text-gray-400">
                     Fill in the details to complete your transaction.
                   </p>
                 </div>
                 {DynamicServiceForm ? (
                   <DynamicServiceForm onSubmit={handleSubmit} isLoading={isLoading} />
                 ) : (
-                  <p className="text-center text-gray-500">Service form not found.</p>
+                  <p className="text-center text-gray-500 dark:text-gray-400">Service form not found.</p>
                 )}
               </div>
             )}
@@ -508,7 +543,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white py-8 mt-12 text-center text-gray-500">
+      <footer className="bg-white dark:bg-gray-800 py-8 mt-12 text-center text-gray-500 dark:text-gray-400 transition-colors duration-500 ease-in-out">
         <div className="container mx-auto px-4">
           <p>© 2024 AjalaGSM. All rights reserved.</p>
         </div>
@@ -533,10 +568,10 @@ const HomePageContent = ({ setAppState }) => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen font-sans transition-colors duration-500 ease-in-out">
       <style>{tailwindCSS}</style>
       {/* Header */}
-      <nav className="bg-white shadow-sm py-4 mb-8">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm py-4 mb-8 transition-colors duration-500 ease-in-out">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-indigo-600">AjalaGSM</h1>
           
@@ -554,7 +589,7 @@ const HomePageContent = ({ setAppState }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-gray-700 hover:text-indigo-600 transition-colors"
+            className="md:hidden p-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 transition-colors"
           >
             {isMenuOpen ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -585,32 +620,32 @@ const HomePageContent = ({ setAppState }) => {
       {/* Main Content Area */}
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <section className="text-center py-12 md:py-20 bg-indigo-50 rounded-2xl shadow-inner mb-12">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
+        <section className="text-center py-12 md:py-20 bg-indigo-50 dark:bg-gray-800 rounded-2xl shadow-inner mb-12 transition-colors duration-500 ease-in-out">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
               Pay Your Bills
             </span>
             <br /> With Ease
           </h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
             Secure, simple, and fast payments for all your daily needs.
           </p>
         </section>
 
         {/* Services Grid */}
         <section className="text-center mb-12">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">Our Services</h3>
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Our Services</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {services.map(service => (
               <button
                 key={service.name}
                 onClick={handleServiceSelect}
-                className="group flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-2 hover:bg-indigo-50"
+                className="group flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-2 hover:bg-indigo-50 dark:hover:bg-indigo-900"
               >
-                <div className="p-4 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors mb-4">
+                <div className="p-4 bg-indigo-100 dark:bg-indigo-900 rounded-full group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800 transition-colors mb-4">
                   {service.icon}
                 </div>
-                <span className="text-lg font-semibold text-gray-700 group-hover:text-indigo-600">{service.name}</span>
+                <span className="text-lg font-semibold text-gray-700 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-200">{service.name}</span>
               </button>
             ))}
           </div>
@@ -618,17 +653,17 @@ const HomePageContent = ({ setAppState }) => {
 
         {/* How It Works Section */}
         <section className="text-center mb-12">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">How It Works</h3>
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">How It Works</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: 1, title: 'Choose a Service', desc: 'Select from our list of services like Data, Airtime, or Cable TV.' },
               { step: 2, title: 'Enter Details', desc: 'Input your phone number or account details and the amount.' },
               { step: 3, title: 'Complete Transaction', desc: 'Confirm your payment and receive your service instantly.' }
             ].map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+              <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
                 <span className="text-4xl font-extrabold text-indigo-600">{item.step}.</span>
-                <h4 className="text-xl font-bold mt-4 mb-2 text-gray-800">{item.title}</h4>
-                <p className="text-gray-500">{item.desc}</p>
+                <h4 className="text-xl font-bold mt-4 mb-2 text-gray-800 dark:text-white">{item.title}</h4>
+                <p className="text-gray-500 dark:text-gray-400">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -636,7 +671,7 @@ const HomePageContent = ({ setAppState }) => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white py-8 mt-12 text-center text-gray-500">
+      <footer className="bg-white dark:bg-gray-800 py-8 mt-12 text-center text-gray-500 dark:text-gray-400 transition-colors duration-500 ease-in-out">
         <div className="container mx-auto px-4">
           <p>© 2024 AjalaGSM. All rights reserved.</p>
         </div>
@@ -653,6 +688,20 @@ const App = () => {
   const [appState, setAppState] = useState('homepage'); // 'homepage', 'auth', 'dashboard'
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [globalAlert, setGlobalAlert] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Function to toggle dark mode state and apply the class to the HTML element
+  const toggleDarkMode = () => {
+    setIsDarkMode(prevMode => {
+      const newMode = !prevMode;
+      if (newMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      return newMode;
+    });
+  };
 
   // Main render logic based on the current app state
   const renderAppContent = () => {
@@ -662,14 +711,20 @@ const App = () => {
       case 'auth':
         return <AuthPage setAppState={setAppState} setLoggedInUser={setLoggedInUser} />;
       case 'dashboard':
-        return <Dashboard setAppState={setAppState} loggedInUser={loggedInUser} setAlert={setGlobalAlert} />;
+        return <Dashboard 
+          setAppState={setAppState} 
+          loggedInUser={loggedInUser} 
+          setAlert={setGlobalAlert} 
+          isDarkMode={isDarkMode} 
+          toggleDarkMode={toggleDarkMode}
+        />;
       default:
         return <HomePageContent setAppState={setAppState} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans antialiased">
+    <div className="min-h-screen font-sans antialiased transition-colors duration-500 ease-in-out">
       <style>{tailwindCSS}</style>
       {renderAppContent()}
       {globalAlert && <CustomAlert message={globalAlert.message} isSuccess={globalAlert.isSuccess} onClose={() => setGlobalAlert(null)} />}
