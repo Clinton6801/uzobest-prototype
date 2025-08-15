@@ -64,6 +64,13 @@ const electricityCompanies = ['EKEDC', 'IKEDC', 'PHEDC', 'AEDC'];
 
 const cableTvProviders = ['DSTV', 'GOTV', 'STARTIMES'];
 
+const transactionHistory = [
+  { id: 1, service: 'Data', date: '2024-05-20', amount: '₦300', status: 'Completed' },
+  { id: 2, service: 'Airtime', date: '2024-05-19', amount: '₦100', status: 'Completed' },
+  { id: 3, service: 'Cable TV', date: '2024-05-18', amount: '₦2,500', status: 'Completed' },
+  { id: 4, service: 'Electricity', date: '2024-05-17', amount: '₦5,000', status: 'Pending' },
+];
+
 
 // --- Page Components ---
 
@@ -140,34 +147,364 @@ const AuthPage = ({ setAppState }) => {
   );
 };
 
-// Dashboard Component
-const Dashboard = ({ setAppState }) => (
-  <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
-    <Card className="max-w-md">
-      <div className="text-center space-y-6">
-        <h2 className="text-3xl font-bold text-green-600">
-          Welcome to your Dashboard!
-        </h2>
-        <p className="text-gray-600">
-          This is a front-end only example, but it shows what a logged-in view could look like.
-        </p>
-        <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
-          <h3 className="text-xl font-semibold mb-2">User Data</h3>
-          <p className="text-gray-500">
-            You're authenticated! This is where you would display personalized content,
-            like profile information, settings, or exclusive features.
-          </p>
+
+// Updated Dashboard Component with service selection, forms, and transaction history
+const Dashboard = ({ setAppState }) => {
+  const [selectedService, setSelectedService] = useState(null);
+  const [alert, setAlert] = useState(null);
+  const userBalance = '₦1,500.00'; // Mock user balance
+
+  // Form Submission Handler
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setAlert({
+      message: `Transaction successful for ${selectedService}!`,
+      isSuccess: true,
+    });
+  };
+
+  // Render Form based on selected service
+  const renderForm = () => {
+    // Return null to hide the form if no service is selected
+    if (!selectedService) {
+      return null;
+    }
+
+    // Common form elements
+    const formContent = (
+      <>
+        <div className="space-y-4">
+          {selectedService === 'Airtime' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  placeholder="e.g., 08012345678"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Amount</label>
+                <input
+                  type="number"
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  placeholder="Enter amount"
+                />
+              </div>
+            </>
+          )}
+
+          {selectedService === 'Data' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Network Provider</label>
+                <select
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  <option value="">Select network</option>
+                  {Object.keys(dataPlans).map(provider => (
+                    <option key={provider} value={provider}>{provider}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  placeholder="e.g., 08012345678"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Select Plan</label>
+                <select
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  <option value="">Select data plan</option>
+                  {Object.entries(dataPlans).flatMap(([provider, plans]) =>
+                    plans.map(plan => (
+                      <option key={plan.id} value={plan.id}>
+                        {provider} - {plan.text}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+            </>
+          )}
+
+          {selectedService === 'Electricity' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Distribution Company</label>
+                <select
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  <option value="">Select company</option>
+                  {electricityCompanies.map(company => (
+                    <option key={company} value={company}>{company}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Meter Number</label>
+                <input
+                  type="text"
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  placeholder="Enter meter number"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Amount</label>
+                <input
+                  type="number"
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  placeholder="Enter amount"
+                />
+              </div>
+            </>
+          )}
+
+          {selectedService === 'Cable TV' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Provider</label>
+                <select
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  <option value="">Select provider</option>
+                  {cableTvProviders.map(provider => (
+                    <option key={provider} value={provider}>{provider}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Smartcard Number</label>
+                <input
+                  type="text"
+                  required
+                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  placeholder="Enter smartcard number"
+                />
+              </div>
+            </>
+          )}
         </div>
         <button
-          onClick={() => setAppState('homepage')}
-          className="w-full sm:w-auto px-8 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg"
+          type="submit"
+          className="w-full px-6 py-3 mt-6 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg"
         >
-          Logout
+          Pay for {selectedService}
         </button>
-      </div>
-    </Card>
-  </div>
-);
+      </>
+    );
+
+    return (
+      <Card className="max-w-md">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">
+            {selectedService} Payment
+          </h2>
+          <p className="text-gray-500">
+            Fill in the details to complete your transaction.
+          </p>
+        </div>
+        <form onSubmit={handleSubmit}>
+          {formContent}
+        </form>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen font-sans">
+      {/* Header */}
+      <nav className="bg-white shadow-sm py-4 mb-8">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-indigo-600">UzoBestGSM</h1>
+          <button
+            onClick={() => setAppState('homepage')}
+            className="px-4 py-2 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content Area */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Dashboard Section */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Balance Card */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-8 text-white shadow-lg">
+              <h3 className="text-xl font-medium">Available Balance</h3>
+              <p className="text-5xl font-extrabold mt-2">{userBalance}</p>
+              <p className="text-sm mt-4 opacity-80">Fund your wallet to make payments with ease.</p>
+              <button
+                onClick={() => setAlert({ message: "Funds added successfully!", isSuccess: true })}
+                className="mt-4 px-6 py-3 bg-white text-indigo-600 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Fund Wallet
+              </button>
+            </div>
+
+            {/* Services Grid */}
+            <div className="bg-white rounded-3xl p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">Services</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {services.map(service => (
+                  <button
+                    key={service.name}
+                    onClick={() => setSelectedService(service.name)}
+                    className={`group flex flex-col items-center justify-center p-6 rounded-2xl shadow-md transition-all transform hover:-translate-y-1 ${selectedService === service.name ? 'bg-indigo-100 shadow-xl' : 'bg-gray-100 hover:bg-indigo-50'}`}
+                  >
+                    <div className="p-4 bg-white rounded-full group-hover:bg-indigo-100 transition-colors mb-4">
+                      {service.icon}
+                    </div>
+                    <span className="text-lg font-semibold text-gray-700">{service.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Dynamic Form Section */}
+            {selectedService && (
+              <div className="bg-white rounded-3xl p-6 shadow-lg">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {selectedService} Payment
+                  </h2>
+                  <p className="text-gray-500">
+                    Fill in the details to complete your transaction.
+                  </p>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Render form content based on selected service */}
+                  {selectedService === 'Airtime' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Amount</label>
+                        <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
+                      </div>
+                    </>
+                  )}
+                  {selectedService === 'Data' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Network Provider</label>
+                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                          <option value="">Select network</option>
+                          {Object.keys(dataPlans).map(provider => (<option key={provider} value={provider}>{provider}</option>))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Select Plan</label>
+                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                          <option value="">Select data plan</option>
+                          {Object.entries(dataPlans).flatMap(([provider, plans]) => plans.map(plan => (<option key={plan.id} value={plan.id}>{provider} - {plan.text}</option>)))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+                  {selectedService === 'Electricity' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Distribution Company</label>
+                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                          <option value="">Select company</option>
+                          {electricityCompanies.map(company => (<option key={company} value={company}>{company}</option>))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Meter Number</label>
+                        <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter meter number" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Amount</label>
+                        <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
+                      </div>
+                    </>
+                  )}
+                  {selectedService === 'Cable TV' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Provider</label>
+                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                          <option value="">Select provider</option>
+                          {cableTvProviders.map(provider => (<option key={provider} value={provider}>{provider}</option>))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Smartcard Number</label>
+                        <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter smartcard number" />
+                      </div>
+                    </>
+                  )}
+                  <button type="submit" className="w-full px-6 py-3 mt-6 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg">
+                    Pay for {selectedService}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {/* Transaction History Section */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-3xl p-6 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">Recent Transactions</h3>
+              <div className="space-y-4">
+                {transactionHistory.map(transaction => (
+                  <div key={transaction.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100">
+                    <div>
+                      <h4 className="font-semibold text-gray-800">{transaction.service}</h4>
+                      <p className="text-sm text-gray-500">{transaction.date}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-gray-900">{transaction.amount}</p>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${transaction.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
+                        {transaction.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white py-8 mt-12 text-center text-gray-500">
+        <div className="container mx-auto px-4">
+          <p>© 2024 UzoBestGSM. All rights reserved.</p>
+        </div>
+      </footer>
+
+      {/* Alert Component */}
+      {alert && <CustomAlert message={alert.message} isSuccess={alert.isSuccess} onClose={() => setAlert(null)} />}
+    </div>
+  );
+};
+
 
 // Home Page with Service Selection & Form
 const HomePageContent = ({ setAppState }) => {
@@ -181,61 +518,6 @@ const HomePageContent = ({ setAppState }) => {
       isSuccess: false,
     });
   };
-
-  // Render the homepage with service cards
-  const renderHomePage = () => (
-    <>
-      {/* Hero Section */}
-      <section className="text-center py-12 md:py-20 bg-indigo-50 rounded-2xl shadow-inner mb-12">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
-            Pay Your Bills
-          </span>
-          <br /> With Ease
-        </h2>
-        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Secure, simple, and fast payments for all your daily needs.
-        </p>
-      </section>
-
-      {/* Services Grid */}
-      <section className="text-center mb-12">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Our Services</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {services.map(service => (
-            <button
-              key={service.name}
-              onClick={handleServiceSelect}
-              className="group flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-2 hover:bg-indigo-50"
-            >
-              <div className="p-4 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors mb-4">
-                {service.icon}
-              </div>
-              <span className="text-lg font-semibold text-gray-700 group-hover:text-indigo-600">{service.name}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="text-center mb-12">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">How It Works</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { step: 1, title: 'Choose a Service', desc: 'Select from our list of services like Data, Airtime, or Cable TV.' },
-            { step: 2, title: 'Enter Details', desc: 'Input your phone number or account details and the amount.' },
-            { step: 3, title: 'Complete Transaction', desc: 'Confirm your payment and receive your service instantly.' }
-          ].map((item, index) => (
-            <div key={index} className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-              <span className="text-4xl font-extrabold text-indigo-600">{item.step}.</span>
-              <h4 className="text-xl font-bold mt-4 mb-2 text-gray-800">{item.title}</h4>
-              <p className="text-gray-500">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  );
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
@@ -255,7 +537,55 @@ const HomePageContent = ({ setAppState }) => {
 
       {/* Main Content Area */}
       <main className="container mx-auto px-4 py-8">
-        {renderHomePage()}
+        {/* Hero Section */}
+        <section className="text-center py-12 md:py-20 bg-indigo-50 rounded-2xl shadow-inner mb-12">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
+              Pay Your Bills
+            </span>
+            <br /> With Ease
+          </h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Secure, simple, and fast payments for all your daily needs.
+          </p>
+        </section>
+
+        {/* Services Grid */}
+        <section className="text-center mb-12">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">Our Services</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {services.map(service => (
+              <button
+                key={service.name}
+                onClick={handleServiceSelect}
+                className="group flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-2 hover:bg-indigo-50"
+              >
+                <div className="p-4 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors mb-4">
+                  {service.icon}
+                </div>
+                <span className="text-lg font-semibold text-gray-700 group-hover:text-indigo-600">{service.name}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="text-center mb-12">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">How It Works</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: 1, title: 'Choose a Service', desc: 'Select from our list of services like Data, Airtime, or Cable TV.' },
+              { step: 2, title: 'Enter Details', desc: 'Input your phone number or account details and the amount.' },
+              { step: 3, title: 'Complete Transaction', desc: 'Confirm your payment and receive your service instantly.' }
+            ].map((item, index) => (
+              <div key={index} className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <span className="text-4xl font-extrabold text-indigo-600">{item.step}.</span>
+                <h4 className="text-xl font-bold mt-4 mb-2 text-gray-800">{item.title}</h4>
+                <p className="text-gray-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
