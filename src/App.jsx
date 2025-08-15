@@ -61,7 +61,6 @@ const dataPlans = {
 };
 
 const electricityCompanies = ['EKEDC', 'IKEDC', 'PHEDC', 'AEDC'];
-
 const cableTvProviders = ['DSTV', 'GOTV', 'STARTIMES'];
 
 const transactionHistory = [
@@ -71,8 +70,124 @@ const transactionHistory = [
   { id: 4, service: 'Electricity', date: '2024-05-17', amount: '₦5,000', status: 'Pending' },
 ];
 
+// --- Form Components for different services ---
+const AirtimeForm = ({ onSubmit, isLoading }) => (
+  <form onSubmit={onSubmit} className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+      <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Amount</label>
+      <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
+    </div>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+      {isLoading ? 'Processing...' : 'Pay for Airtime'}
+    </button>
+  </form>
+);
 
-// --- Page Components ---
+const DataForm = ({ onSubmit, isLoading }) => (
+  <form onSubmit={onSubmit} className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Network Provider</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+        <option value="">Select network</option>
+        {Object.keys(dataPlans).map(provider => (<option key={provider} value={provider}>{provider}</option>))}
+      </select>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+      <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Select Plan</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+        <option value="">Select data plan</option>
+        {Object.entries(dataPlans).flatMap(([provider, plans]) => plans.map(plan => (<option key={plan.id} value={plan.id}>{provider} - {plan.text}</option>)))}
+      </select>
+    </div>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+      {isLoading ? 'Processing...' : 'Pay for Data'}
+    </button>
+  </form>
+);
+
+const ElectricityForm = ({ onSubmit, isLoading }) => (
+  <form onSubmit={onSubmit} className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Distribution Company</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+        <option value="">Select company</option>
+        {electricityCompanies.map(company => (<option key={company} value={company}>{company}</option>))}
+      </select>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Meter Number</label>
+      <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter meter number" />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Amount</label>
+      <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
+    </div>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+      {isLoading ? 'Processing...' : 'Pay for Electricity'}
+    </button>
+  </form>
+);
+
+const CableTvForm = ({ onSubmit, isLoading }) => (
+  <form onSubmit={onSubmit} className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Provider</label>
+      <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+        <option value="">Select provider</option>
+        {cableTvProviders.map(provider => (<option key={provider} value={provider}>{provider}</option>))}
+      </select>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700">Smartcard Number</label>
+      <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter smartcard number" />
+    </div>
+    <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+      {isLoading ? 'Processing...' : 'Pay for Cable TV'}
+    </button>
+  </form>
+);
+
+
+// Map of service names to their form components
+const serviceForms = {
+  Airtime: AirtimeForm,
+  Data: DataForm,
+  Electricity: ElectricityForm,
+  'Cable TV': CableTvForm
+};
+
+
+// Transaction history list component
+const TransactionHistoryList = ({ history }) => (
+  <div className="bg-white rounded-3xl p-6 shadow-lg">
+    <h3 className="text-2xl font-bold text-gray-800 mb-6">Recent Transactions</h3>
+    <div className="space-y-4">
+      {history.map(transaction => (
+        <div key={transaction.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100">
+          <div>
+            <h4 className="font-semibold text-gray-800">{transaction.service}</h4>
+            <p className="text-sm text-gray-500">{transaction.date}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-bold text-gray-900">{transaction.amount}</p>
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${transaction.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
+              {transaction.status}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 
 // Auth Page Component (Login & Register)
 const AuthPage = ({ setAppState, setLoggedInUser }) => {
@@ -151,10 +266,10 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
 
 
 // Updated Dashboard Component with service selection, forms, and transaction history
-const Dashboard = ({ setAppState, loggedInUser }) => {
+const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   const [selectedService, setSelectedService] = useState(null);
-  const [alert, setAlert] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Create a ref for the dropdown container
   const profileRef = useRef(null);
@@ -183,10 +298,15 @@ const Dashboard = ({ setAppState, loggedInUser }) => {
   // Form Submission Handler
   const handleSubmit = (e) => {
     e.preventDefault();
-    setAlert({
-      message: `Transaction successful for ${selectedService}!`,
-      isSuccess: true,
-    });
+    setIsLoading(true);
+    // Simulate a network request delay
+    setTimeout(() => {
+      setIsLoading(false);
+      setAlert({
+        message: `Transaction successful for ${selectedService}!`,
+        isSuccess: true,
+      });
+    }, 1500);
   };
 
   const handleProfileAction = (action) => {
@@ -196,6 +316,8 @@ const Dashboard = ({ setAppState, loggedInUser }) => {
     });
     setIsProfileMenuOpen(false);
   };
+
+  const DynamicServiceForm = serviceForms[selectedService];
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
@@ -290,105 +412,18 @@ const Dashboard = ({ setAppState, loggedInUser }) => {
                     Fill in the details to complete your transaction.
                   </p>
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Render form content based on selected service */}
-                  {selectedService === 'Airtime' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Amount</label>
-                        <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
-                      </div>
-                    </>
-                  )}
-                  {selectedService === 'Data' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Network Provider</label>
-                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                          <option value="">Select network</option>
-                          {Object.keys(dataPlans).map(provider => (<option key={provider} value={provider}>{provider}</option>))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input type="tel" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="e.g., 08012345678" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Select Plan</label>
-                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                          <option value="">Select data plan</option>
-                          {Object.entries(dataPlans).flatMap(([provider, plans]) => plans.map(plan => (<option key={plan.id} value={plan.id}>{provider} - {plan.text}</option>)))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-                  {selectedService === 'Electricity' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Distribution Company</label>
-                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                          <option value="">Select company</option>
-                          {electricityCompanies.map(company => (<option key={company} value={company}>{company}</option>))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Meter Number</label>
-                        <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter meter number" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Amount</label>
-                        <input type="number" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter amount" />
-                      </div>
-                    </>
-                  )}
-                  {selectedService === 'Cable TV' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Provider</label>
-                        <select required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                          <option value="">Select provider</option>
-                          {cableTvProviders.map(provider => (<option key={provider} value={provider}>{provider}</option>))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Smartcard Number</label>
-                        <input type="text" required className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Enter smartcard number" />
-                      </div>
-                    </>
-                  )}
-                  <button type="submit" className="w-full px-6 py-3 mt-6 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg">
-                    Pay for {selectedService}
-                  </button>
-                </form>
+                {DynamicServiceForm ? (
+                  <DynamicServiceForm onSubmit={handleSubmit} isLoading={isLoading} />
+                ) : (
+                  <p className="text-center text-gray-500">Service form not found.</p>
+                )}
               </div>
             )}
           </div>
 
           {/* Transaction History Section */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">Recent Transactions</h3>
-              <div className="space-y-4">
-                {transactionHistory.map(transaction => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100">
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{transaction.service}</h4>
-                      <p className="text-sm text-gray-500">{transaction.date}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">{transaction.amount}</p>
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${transaction.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                        {transaction.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <TransactionHistoryList history={transactionHistory} />
           </div>
         </div>
       </main>
@@ -399,8 +434,6 @@ const Dashboard = ({ setAppState, loggedInUser }) => {
           <p>© 2024 AjalaGSM. All rights reserved.</p>
         </div>
       </footer>
-
-      {alert && <CustomAlert message={alert.message} isSuccess={alert.isSuccess} onClose={() => setAlert(null)} />}
     </div>
   );
 };
@@ -539,6 +572,7 @@ const HomePageContent = ({ setAppState }) => {
 const App = () => {
   const [appState, setAppState] = useState('homepage'); // 'homepage', 'auth', 'dashboard'
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [globalAlert, setGlobalAlert] = useState(null);
 
   // Main render logic based on the current app state
   const renderAppContent = () => {
@@ -548,7 +582,7 @@ const App = () => {
       case 'auth':
         return <AuthPage setAppState={setAppState} setLoggedInUser={setLoggedInUser} />;
       case 'dashboard':
-        return <Dashboard setAppState={setAppState} loggedInUser={loggedInUser} />;
+        return <Dashboard setAppState={setAppState} loggedInUser={loggedInUser} setAlert={setGlobalAlert} />;
       default:
         return <HomePageContent setAppState={setAppState} />;
     }
@@ -557,6 +591,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-100 font-sans antialiased">
       {renderAppContent()}
+      {globalAlert && <CustomAlert message={globalAlert.message} isSuccess={globalAlert.isSuccess} onClose={() => setGlobalAlert(null)} />}
     </div>
   );
 };
