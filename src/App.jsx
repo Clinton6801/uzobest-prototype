@@ -202,7 +202,9 @@ const Dashboard = ({ setAppState, loggedInUser }) => {
       {/* Header */}
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-indigo-600">UzoBestGSM</h1>
+          <h1 className="text-2xl font-bold text-indigo-600">AJALAGsm
+        
+          </h1>
           <div className="flex items-center space-x-4 relative" ref={profileRef}>
             {/* Profile Button */}
             <button
@@ -396,7 +398,7 @@ const Dashboard = ({ setAppState, loggedInUser }) => {
       {/* Footer */}
       <footer className="bg-white py-8 mt-12 text-center text-gray-500">
         <div className="container mx-auto px-4">
-          <p>© 2024 UzoBestGSM. All rights reserved.</p>
+          <p>© 2024 AJALAGsm All rights reserved.</p>
         </div>
       </footer>
 
@@ -425,7 +427,7 @@ const HomePageContent = ({ setAppState }) => {
       {/* Header */}
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-indigo-600">UzoBestGSM</h1>
+          <h1 className="text-2xl font-bold text-indigo-600">AJALAGsm</h1>
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
@@ -525,7 +527,7 @@ const HomePageContent = ({ setAppState }) => {
       {/* Footer */}
       <footer className="bg-white py-8 mt-12 text-center text-gray-500">
         <div className="container mx-auto px-4">
-          <p>© 2024 UzoBestGSM. All rights reserved.</p>
+          <p>© 2024 AJALAGsm. All rights reserved.</p>
         </div>
       </footer>
 
