@@ -509,6 +509,7 @@ const Dashboard = ({ setAppState }) => {
 // Home Page with Service Selection & Form
 const HomePageContent = ({ setAppState }) => {
   const [alert, setAlert] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Handle service selection from the homepage
   const handleServiceSelect = () => {
@@ -525,14 +526,47 @@ const HomePageContent = ({ setAppState }) => {
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-indigo-600">UzoBestGSM</h1>
-          <a
-            href="#"
-            onClick={() => setAppState('auth')}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-semibold hover:bg-indigo-700 transition-colors hidden md:block"
+          
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            <a
+              href="#"
+              onClick={() => setAppState('auth')}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-semibold hover:bg-indigo-700 transition-colors"
+            >
+              Sign In
+            </a>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-gray-700 hover:text-indigo-600 transition-colors"
           >
-            Sign In
-          </a>
+            {isMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
+        
+        {/* Mobile Menu Content */}
+        {isMenuOpen && (
+          <div className="md:hidden mt-4 mx-4">
+            <a
+              href="#"
+              onClick={() => setAppState('auth')}
+              className="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors"
+            >
+              Sign In
+            </a>
+          </div>
+        )}
       </nav>
 
       {/* Main Content Area */}
