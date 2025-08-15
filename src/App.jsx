@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // --- Reusable Components ---
 
@@ -75,8 +75,17 @@ const transactionHistory = [
 // --- Page Components ---
 
 // Auth Page Component (Login & Register)
-const AuthPage = ({ setAppState }) => {
+const AuthPage = ({ setAppState, setLoggedInUser }) => {
   const [isLoginView, setIsLoginView] = useState(true);
+  const [username, setUsername] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // For both login and registration, we set the username.
+    // In a real app, you would validate credentials here.
+    setLoggedInUser(username);
+    setAppState('dashboard');
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
@@ -90,23 +99,16 @@ const AuthPage = ({ setAppState }) => {
           </p>
         </div>
         
-        <form onSubmit={(e) => { e.preventDefault(); setAppState('dashboard'); }} className="space-y-4">
-          {!isLoginView && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Username</label>
-              <input
-                type="text"
-                required
-                className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              />
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
             <input
-              type="email"
+              type="text"
               required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              placeholder="Enter your username"
             />
           </div>
           <div>
@@ -149,10 +151,34 @@ const AuthPage = ({ setAppState }) => {
 
 
 // Updated Dashboard Component with service selection, forms, and transaction history
-const Dashboard = ({ setAppState }) => {
+const Dashboard = ({ setAppState, loggedInUser }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [alert, setAlert] = useState(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  
+  // Create a ref for the dropdown container
+  const profileRef = useRef(null);
+
   const userBalance = '₦1,500.00'; // Mock user balance
+  const username = loggedInUser || 'User'; // Use the logged-in user name or a generic "User"
+  const firstLetter = username.charAt(0).toUpperCase();
+
+  // Effect to handle clicks outside the profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click occurred outside the profile menu container
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    // Add the event listener to the document
+    document.addEventListener("mousedown", handleClickOutside);
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileRef]); // Re-run effect if ref changes (it won't, but good practice)
+
 
   // Form Submission Handler
   const handleSubmit = (e) => {
@@ -163,167 +189,12 @@ const Dashboard = ({ setAppState }) => {
     });
   };
 
-  // Render Form based on selected service
-  const renderForm = () => {
-    // Return null to hide the form if no service is selected
-    if (!selectedService) {
-      return null;
-    }
-
-    // Common form elements
-    const formContent = (
-      <>
-        <div className="space-y-4">
-          {selectedService === 'Airtime' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="e.g., 08012345678"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Amount</label>
-                <input
-                  type="number"
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="Enter amount"
-                />
-              </div>
-            </>
-          )}
-
-          {selectedService === 'Data' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Network Provider</label>
-                <select
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                >
-                  <option value="">Select network</option>
-                  {Object.keys(dataPlans).map(provider => (
-                    <option key={provider} value={provider}>{provider}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="e.g., 08012345678"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Select Plan</label>
-                <select
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                >
-                  <option value="">Select data plan</option>
-                  {Object.entries(dataPlans).flatMap(([provider, plans]) =>
-                    plans.map(plan => (
-                      <option key={plan.id} value={plan.id}>
-                        {provider} - {plan.text}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-            </>
-          )}
-
-          {selectedService === 'Electricity' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Distribution Company</label>
-                <select
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                >
-                  <option value="">Select company</option>
-                  {electricityCompanies.map(company => (
-                    <option key={company} value={company}>{company}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Meter Number</label>
-                <input
-                  type="text"
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="Enter meter number"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Amount</label>
-                <input
-                  type="number"
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="Enter amount"
-                />
-              </div>
-            </>
-          )}
-
-          {selectedService === 'Cable TV' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Provider</label>
-                <select
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                >
-                  <option value="">Select provider</option>
-                  {cableTvProviders.map(provider => (
-                    <option key={provider} value={provider}>{provider}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Smartcard Number</label>
-                <input
-                  type="text"
-                  required
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="Enter smartcard number"
-                />
-              </div>
-            </>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="w-full px-6 py-3 mt-6 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg"
-        >
-          Pay for {selectedService}
-        </button>
-      </>
-    );
-
-    return (
-      <Card className="max-w-md">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {selectedService} Payment
-          </h2>
-          <p className="text-gray-500">
-            Fill in the details to complete your transaction.
-          </p>
-        </div>
-        <form onSubmit={handleSubmit}>
-          {formContent}
-        </form>
-      </Card>
-    );
+  const handleProfileAction = (action) => {
+    setAlert({
+      message: `"${action}" feature is coming soon!`,
+      isSuccess: true,
+    });
+    setIsProfileMenuOpen(false);
   };
 
   return (
@@ -332,17 +203,47 @@ const Dashboard = ({ setAppState }) => {
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-indigo-600">UzoBestGSM</h1>
-          <button
-            onClick={() => setAppState('homepage')}
-            className="px-4 py-2 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors"
-          >
-            Logout
-          </button>
+          <div className="flex items-center space-x-4 relative" ref={profileRef}>
+            {/* Profile Button */}
+            <button
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-110"
+              aria-label="User Profile Menu"
+            >
+              {firstLetter}
+            </button>
+            {/* Profile Dropdown Menu */}
+            {isProfileMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-10 animate-fade-in-down">
+                <button
+                  onClick={() => handleProfileAction('Edit Profile')}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => handleProfileAction('Change Password')}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Change Password
+                </button>
+                <div className="border-t border-gray-200 mt-2 pt-2">
+                  <button
+                    onClick={() => setAppState('homepage')}
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
       {/* Main Content Area */}
       <main className="container mx-auto px-4 py-8">
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-6">Welcome back, {username}!</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Dashboard Section */}
           <div className="lg:col-span-2 space-y-8">
@@ -499,7 +400,6 @@ const Dashboard = ({ setAppState }) => {
         </div>
       </footer>
 
-      {/* Alert Component */}
       {alert && <CustomAlert message={alert.message} isSuccess={alert.isSuccess} onClose={() => setAlert(null)} />}
     </div>
   );
@@ -637,8 +537,8 @@ const HomePageContent = ({ setAppState }) => {
 
 // Main application component to handle top-level routing
 const App = () => {
-  // State to manage which top-level page is currently displayed
   const [appState, setAppState] = useState('homepage'); // 'homepage', 'auth', 'dashboard'
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   // Main render logic based on the current app state
   const renderAppContent = () => {
@@ -646,9 +546,9 @@ const App = () => {
       case 'homepage':
         return <HomePageContent setAppState={setAppState} />;
       case 'auth':
-        return <AuthPage setAppState={setAppState} />;
+        return <AuthPage setAppState={setAppState} setLoggedInUser={setLoggedInUser} />;
       case 'dashboard':
-        return <Dashboard setAppState={setAppState} />;
+        return <Dashboard setAppState={setAppState} loggedInUser={loggedInUser} />;
       default:
         return <HomePageContent setAppState={setAppState} />;
     }
