@@ -1,5 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+// Tailwind CSS keyframes for animations
+const tailwindCSS = `
+  @keyframes fade-in-down {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-down {
+    animation: fade-in-down 0.5s ease-out forwards;
+  }
+`;
+
 // --- Reusable Components ---
 
 // Reusable card container for consistent styling
@@ -24,7 +41,8 @@ const CustomAlert = ({ message, isSuccess, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl p-8 shadow-2xl text-center max-w-sm">
+      <style>{tailwindCSS}</style>
+      <div className="bg-white rounded-3xl p-8 shadow-2xl text-center max-w-sm animate-fade-in-down">
         <div className="flex flex-col items-center">
           <h3 className="text-xl font-bold text-gray-800 mb-2">{isSuccess ? 'Success!' : 'Error'}</h3>
           {icon}
@@ -155,13 +173,57 @@ const CableTvForm = ({ onSubmit, isLoading }) => (
   </form>
 );
 
-
 // Map of service names to their form components
 const serviceForms = {
   Airtime: AirtimeForm,
   Data: DataForm,
   Electricity: ElectricityForm,
   'Cable TV': CableTvForm
+};
+
+// --- NEW Feedback Form Component ---
+const FeedbackForm = ({ onSubmit, isLoading }) => {
+  const [feedback, setFeedback] = useState('');
+
+  const handleFeedbackSubmit = (e) => {
+    e.preventDefault();
+    if (feedback.trim()) {
+      onSubmit(e, feedback); // Pass the feedback text to the parent onSubmit handler
+      setFeedback(''); // Clear the form after submission
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-3xl p-6 shadow-lg">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Feedback & Suggestions</h3>
+      <p className="text-gray-500 mb-4">
+        We value your opinion! Please let us know your thoughts.
+      </p>
+      <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="feedback" className="block text-sm font-medium text-gray-700">
+            Your message
+          </label>
+          <textarea
+            id="feedback"
+            rows="4"
+            required
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Type your feedback, questions, or suggestions here..."
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`w-full px-6 py-3 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+        >
+          {isLoading ? 'Submitting...' : 'Submit Feedback'}
+        </button>
+      </form>
+    </div>
+  );
 };
 
 
@@ -204,6 +266,7 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
+      <style>{tailwindCSS}</style>
       <Card className="max-w-md">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-900">
@@ -295,16 +358,27 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   }, [profileRef]); // Re-run effect if ref changes (it won't, but good practice)
 
 
-  // Form Submission Handler
-  const handleSubmit = (e) => {
+  // Universal Form Submission Handler for services and feedback
+  const handleSubmit = (e, feedbackMessage = null) => {
     e.preventDefault();
     setIsLoading(true);
+    let message = '';
+    let isSuccess = true;
+
+    if (feedbackMessage) {
+      // Handle feedback submission
+      message = 'Thank you for your feedback! We appreciate your input.';
+    } else {
+      // Handle service payment submission
+      message = `Transaction successful for ${selectedService}!`;
+    }
+
     // Simulate a network request delay
     setTimeout(() => {
       setIsLoading(false);
       setAlert({
-        message: `Transaction successful for ${selectedService}!`,
-        isSuccess: true,
+        message: message,
+        isSuccess: isSuccess,
       });
     }, 1500);
   };
@@ -321,6 +395,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
+      <style>{tailwindCSS}</style>
       {/* Header */}
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
@@ -421,9 +496,13 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
             )}
           </div>
 
-          {/* Transaction History Section */}
-          <div className="lg:col-span-1">
+          {/* Right-hand side column for History and Feedback */}
+          <div className="lg:col-span-1 space-y-8">
+            {/* Transaction History Section */}
             <TransactionHistoryList history={transactionHistory} />
+            
+            {/* Feedback Form Section */}
+            <FeedbackForm onSubmit={handleSubmit} isLoading={isLoading} />
           </div>
         </div>
       </main>
@@ -455,6 +534,7 @@ const HomePageContent = ({ setAppState }) => {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
+      <style>{tailwindCSS}</style>
       {/* Header */}
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
@@ -590,6 +670,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans antialiased">
+      <style>{tailwindCSS}</style>
       {renderAppContent()}
       {globalAlert && <CustomAlert message={globalAlert.message} isSuccess={globalAlert.isSuccess} onClose={() => setGlobalAlert(null)} />}
     </div>
