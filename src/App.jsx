@@ -76,6 +76,14 @@ const dataPlans = {
     { id: 'glo-1gb', text: '1.2GB - ₦300 (7 days)' },
     { id: 'glo-3gb', text: '3.5GB - ₦1,000 (30 days)' },
   ],
+  AIRTEL: [
+    { id: 'mtn-1gb', text: '1GB - ₦300 (7 days)' },
+    { id: 'mtn-2gb', text: '2GB - ₦500 (14 days)' },
+  ],
+  NINEMOBILE: [
+    { id: 'glo-1gb', text: '1.2GB - ₦300 (7 days)' },
+    { id: 'glo-3gb', text: '3.5GB - ₦1,000 (30 days)' },
+  ],
 };
 
 const electricityCompanies = ['EKEDC', 'IKEDC', 'PHEDC', 'AEDC'];
