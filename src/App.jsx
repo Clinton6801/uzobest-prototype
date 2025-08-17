@@ -15,6 +15,32 @@ const tailwindCSS = `
   .animate-fade-in-down {
     animation: fade-in-down 0.5s ease-out forwards;
   }
+
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.4s ease-out forwards;
+  }
+
+  @keyframes slide-out-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-slide-out-left {
+    animation: slide-out-left 0.4s ease-out forwards;
+  }
 `;
 
 // --- Reusable Components ---
@@ -108,6 +134,7 @@ const AirtimeForm = ({ onSubmit, isLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Buy Airtime</h3>
       <div>
         <label htmlFor="airtime-phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
         <input
@@ -151,6 +178,7 @@ const DataForm = ({ onSubmit, isLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Buy Data</h3>
       <div>
         <label htmlFor="data-provider" className="block text-sm font-medium text-gray-700">Network Provider</label>
         <select
@@ -205,6 +233,7 @@ const ElectricityForm = ({ onSubmit, isLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Pay for Electricity</h3>
       <div>
         <label htmlFor="elec-company" className="block text-sm font-medium text-gray-700">Distribution Company</label>
         <select
@@ -257,6 +286,7 @@ const CableTvForm = ({ onSubmit, isLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Upgrade your Cable</h3>
       <div>
         <label htmlFor="cable-provider" className="block text-sm font-medium text-gray-700">Provider</label>
         <select
@@ -362,8 +392,6 @@ const TransactionHistoryList = ({ history }) => (
     </div>
   </div>
 );
-
-
 
 
 // A simple component for the alert messages
@@ -631,8 +659,7 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
             type="button"
             onClick={() => {
               setShowForgotPassword(false);
-              setAlert(null);
-              // Back to login view
+              setAlert(null); // Back to login view
               setIsLoginView(true);
             }}
             className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
@@ -885,25 +912,70 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
   );
 };
 
+// NEW: Side Menu Panel Component
+const SideMenuPanel = ({ isOpen, onClose, onMenuItemClick }) => {
+  const menuItems = [
+    { name: 'Buy Data', service: 'Data' },
+    { name: 'Buy Airtime', service: 'Airtime' },
+    { name: 'Upgrade your cable', service: 'Cable TV' },
+    { name: 'Pay for Electricity', service: 'Electricity' },
+    { name: 'Fund Wallet', action: 'fund' },
+    { name: 'Recent Transactions', action: 'transactions' },
+  ];
+
+  const panelClasses = `
+    fixed top-0 left-0 h-full w-full max-w-xs bg-white shadow-2xl z-40 p-6 transition-transform duration-300 ease-in-out
+    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+  `;
+
+  return (
+    <div className={panelClasses}>
+      <div className="flex justify-between items-center mb-6 border-b pb-4">
+        <h3 className="text-2xl font-bold text-gray-900">Menu</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close menu">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div className="flex flex-col space-y-4">
+        {menuItems.map(item => (
+          <button
+            key={item.name}
+            onClick={() => onMenuItemClick(item)}
+            className="w-full text-left p-3 rounded-xl transition-colors bg-gray-100 hover:bg-indigo-50 text-gray-700 font-medium"
+          >
+            {item.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 
-// Updated Dashboard Component with service selection, forms, and transaction history
+// Updated Dashboard Component with side menu and scroll-to-form functionality
 const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
-  const [selectedService, setSelectedService] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Create a ref for the dropdown container
+  // Create refs for each section that needs to be scrolled to
   const profileRef = useRef(null);
+  const dataFormRef = useRef(null);
+  const airtimeFormRef = useRef(null);
+  const cableTvFormRef = useRef(null);
+  const electricityFormRef = useRef(null);
+  const transactionsRef = useRef(null);
 
   const userBalance = '₦1,500.00'; // Mock user balance
   const username = loggedInUser || 'User'; // Use the logged-in user name or a generic "User"
   const firstLetter = username.charAt(0).toUpperCase();
 
-  // Effect to handle clicks outside the profile dropdown
+  // Effect to handle clicks outside the profile menu
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if the click occurred outside the profile menu container
+      // Close profile menu if click is outside of it
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileMenuOpen(false);
       }
@@ -914,7 +986,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [profileRef]); // Re-run effect if ref changes (it won't, but good practice)
+  }, [profileRef]);
 
   // Universal Form Submission Handler for services and feedback
   const handleSubmit = async (service, formData) => {
@@ -979,18 +1051,70 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
     });
     setIsProfileMenuOpen(false);
   };
-
-  const DynamicServiceForm = serviceForms[selectedService];
+  
+  // Handler for mobile menu items, uses refs to scroll to the correct section
+  const handleMobileMenuItemClick = (item) => {
+    if (item.action === 'fund') {
+      setAlert({ message: "Funds added successfully!", isSuccess: true });
+    } else if (item.action === 'transactions') {
+      transactionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (item.service === 'Data') {
+      dataFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (item.service === 'Airtime') {
+      airtimeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (item.service === 'Cable TV') {
+      cableTvFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (item.service === 'Electricity') {
+      electricityFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    setIsMobileMenuOpen(false); // Close the menu on selection
+  };
+  
+  // Handler for service grid buttons on desktop/larger screens
+  const handleServiceGridClick = (serviceName) => {
+    // This handler will also scroll to the correct section
+    if (serviceName === 'Data') {
+      dataFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (serviceName === 'Airtime') {
+      airtimeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (serviceName === 'Cable TV') {
+      cableTvFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (serviceName === 'Electricity') {
+      electricityFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <style>{tailwindCSS}</style>
+      
+      {/* Side Menu Panel (visible on all screens but controlled by state) */}
+      <SideMenuPanel
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onMenuItemClick={handleMobileMenuItemClick}
+      />
+      
       {/* Header */}
       <nav className="bg-white shadow-sm py-4 mb-8">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-indigo-600">AjalaGSM</h1>
+          {/* Mobile menu button and Brand */}
+          <div className="flex items-center">
+            {/* Mobile menu button, visible only on smaller screens */}
+            <button
+              id="mobile-menu-button"
+              onClick={() => setIsMobileMenuOpen(true)} // Open side panel
+              className="md:hidden p-2 mr-2 text-gray-700 hover:text-indigo-600 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-2xl font-bold text-indigo-600">AjalaGSM</h1>
+          </div>
+          
           <div className="flex items-center space-x-4 relative" ref={profileRef}>
-            {/* Profile Button */}
+            {/* Profile Button (Desktop & Mobile) */}
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-110"
@@ -1053,8 +1177,8 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
                 {services.map(service => (
                   <button
                     key={service.name}
-                    onClick={() => setSelectedService(service.name)}
-                    className={`group flex flex-col items-center justify-center p-6 rounded-2xl shadow-md transition-all transform hover:-translate-y-1 ${selectedService === service.name ? 'bg-indigo-100 shadow-xl' : 'bg-gray-100 hover:bg-indigo-50'}`}
+                    onClick={() => handleServiceGridClick(service.name)}
+                    className={`group flex flex-col items-center justify-center p-6 rounded-2xl shadow-md transition-all transform hover:-translate-y-1 bg-gray-100 hover:bg-indigo-50`}
                   >
                     <div className="p-4 bg-white rounded-full group-hover:bg-indigo-100 transition-colors mb-4">
                       {service.icon}
@@ -1064,31 +1188,38 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
                 ))}
               </div>
             </div>
-
-            {/* Dynamic Form Section */}
-            {selectedService && (
-              <div className="bg-white rounded-3xl p-6 shadow-lg">
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {selectedService} Payment
-                  </h2>
-                  <p className="text-gray-500">
-                    Fill in the details to complete your transaction.
-                  </p>
-                </div>
-                {DynamicServiceForm ? (
-                  <DynamicServiceForm onSubmit={handleSubmit} isLoading={isLoading} />
-                ) : (
-                  <p className="text-center text-gray-500">Service form not found.</p>
-                )}
+            
+            {/* Service Forms Section */}
+            <div className="space-y-8">
+              <div ref={airtimeFormRef}>
+                <Card>
+                  <AirtimeForm onSubmit={handleSubmit} isLoading={isLoading} />
+                </Card>
               </div>
-            )}
+              <div ref={dataFormRef}>
+                <Card>
+                  <DataForm onSubmit={handleSubmit} isLoading={isLoading} />
+                </Card>
+              </div>
+              <div ref={electricityFormRef}>
+                <Card>
+                  <ElectricityForm onSubmit={handleSubmit} isLoading={isLoading} />
+                </Card>
+              </div>
+              <div ref={cableTvFormRef}>
+                <Card>
+                  <CableTvForm onSubmit={handleSubmit} isLoading={isLoading} />
+                </Card>
+              </div>
+            </div>
           </div>
 
           {/* Right-hand side column for History and Feedback */}
           <div className="lg:col-span-1 space-y-8">
             {/* Transaction History Section */}
-            <TransactionHistoryList history={transactionHistory} />
+            <div ref={transactionsRef}>
+              <TransactionHistoryList history={transactionHistory} />
+            </div>
             
             {/* Feedback Form Section */}
             <FeedbackForm onSubmit={handleSubmit} isLoading={isLoading} />
