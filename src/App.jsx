@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Component } from 'react';
 
 // Tailwind CSS keyframes for animations
 const tailwindCSS = `
@@ -363,20 +363,160 @@ const TransactionHistoryList = ({ history }) => (
   </div>
 );
 
-// Auth Page Component (Login & Register)
-const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
+
+
+
+// A simple component for the alert messages
+const Alert = ({ message, isSuccess }) => {
+  if (!message) return null;
+  return (
+    <div className={`p-4 rounded-lg text-sm font-medium ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+      {message}
+    </div>
+  );
+};
+
+// Error Boundary Component to catch rendering errors
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // You can also log the error to an error reporting service
+    console.error("Uncaught error in component:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return (
+        <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
+          <Card className="max-w-md text-center">
+            <h2 className="text-xl font-bold text-red-600">Something went wrong.</h2>
+            <p className="mt-2 text-sm text-gray-500">
+              Please check the browser console for more details on the error.
+            </p>
+          </Card>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Main Auth Page Component (Login & Register)
+const AuthPage = ({ setAppState, setLoggedInUser }) => {
+  // State to toggle between Login, Register, and now, Forgot Password views
   const [isLoginView, setIsLoginView] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     firstName: '',
     lastName: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: ''
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [alert, setAlert] = useState(null);
+
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log('Component State Updated:', {
+      isLoginView,
+      showForgotPassword,
+      showOtpInput,
+      showNewPasswordForm
+    });
+  }, [isLoginView, showForgotPassword, showOtpInput, showNewPasswordForm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({ ...prevState, [name]: value }));
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    const { email } = formData;
+
+    try {
+      // In a real application, you would make an API call to send an OTP
+      // const response = await fetch('YOUR_SEND_OTP_API_ENDPOINT_HERE', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email }),
+      // });
+      // const data = await response.json();
+
+      // if (response.ok) {
+      //   setAlert({ message: 'An OTP has been sent to your email.', isSuccess: true });
+      //   setShowForgotPassword(false);
+      //   setShowOtpInput(true);
+      // } else {
+      //   setAlert({ message: data.message || 'An error occurred. Please try again.', isSuccess: false });
+      // }
+
+      // --- Mock success for demonstration purposes ---
+      console.log('Mock send OTP API call with data:', { email });
+      setAlert({ message: 'An OTP has been sent to your email.', isSuccess: true });
+      setShowForgotPassword(false);
+      setShowOtpInput(true);
+      setFormData(prev => ({ ...prev, otp: '123456' })); // Mock OTP for testing
+      // --- End of mock logic ---
+
+    } catch (error) {
+      setAlert({ message: 'Network error. Please try again later.', isSuccess: false });
+    }
+  };
+
+  const handleOtpSubmit = (e) => {
+    e.preventDefault();
+    // In a real application, you would make an API call to verify the OTP
+    // const response = await fetch('YOUR_VERIFY_OTP_API_ENDPOINT_HERE', { ... });
+    // if (response.ok) { ... }
+
+    // --- Mock verification ---
+    if (formData.otp === '123456') { // Check against the mock OTP
+      setAlert({ message: 'OTP verified successfully.', isSuccess: true });
+      setShowOtpInput(false);
+      setShowNewPasswordForm(true);
+    } else {
+      setAlert({ message: 'Invalid OTP. Please try again.', isSuccess: false });
+    }
+    // --- End of mock logic ---
+  };
+
+  const handleNewPasswordSubmit = (e) => {
+    e.preventDefault();
+    const { newPassword, confirmPassword } = formData;
+
+    if (newPassword !== confirmPassword) {
+      setAlert({ message: 'Passwords do not match.', isSuccess: false });
+      return;
+    }
+
+    // In a real application, you would make an API call to set the new password
+    // const response = await fetch('YOUR_SET_PASSWORD_API_ENDPOINT_HERE', { ... });
+
+    // --- Mock password update ---
+    console.log('Mock password update for email:', formData.email, 'with new password:', newPassword);
+    setAlert({ message: 'Your password has been reset successfully. You can now log in.', isSuccess: true });
+    setShowNewPasswordForm(false);
+    setIsLoginView(true);
+    // --- End of mock logic ---
   };
 
   const handleSubmit = async (e) => {
@@ -386,35 +526,23 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     let body = {};
     let successMessage = '';
 
+    // If it's the registration view, we must check if the user agreed to terms
+    if (!isLoginView && !agreedToTerms) {
+      setAlert({ message: 'You must agree to the Terms & Conditions.', isSuccess: false });
+      return;
+    }
+
     if (isLoginView) {
-      endpoint = 'YOUR_LOGIN_API_ENDPOINT_HERE'; // 👈 **Backend URL for Login**
+      endpoint = 'YOUR_LOGIN_API_ENDPOINT_HERE';
       body = { username, password };
       successMessage = 'Login successful!';
     } else {
-      endpoint = 'YOUR_REGISTER_API_ENDPOINT_HERE'; // 👈 **Backend URL for Registration**
+      endpoint = 'YOUR_REGISTER_API_ENDPOINT_HERE';
       body = { username, email, password, firstName, lastName };
       successMessage = 'Registration successful! You can now log in.';
     }
 
     try {
-      // In a real application, you would make an API call here.
-      // const response = await fetch(endpoint, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(body),
-      // });
-      // const data = await response.json();
-      
-      // if (response.ok) {
-      //   // Assume the API returns a user object or a token
-      //   setLoggedInUser(username);
-      //   setAppState('dashboard');
-      //   setAlert({ message: successMessage, isSuccess: true });
-      // } else {
-      //   // Handle API errors
-      //   setAlert({ message: data.message || 'An error occurred. Please try again.', isSuccess: false });
-      // }
-
       // --- Mock success for demonstration purposes ---
       console.log('Mock API call with data:', body);
       setLoggedInUser(username);
@@ -427,79 +555,153 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
-      <style>{tailwindCSS}</style>
-      <Card className="max-w-md">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {isLoginView ? 'Sign In' : 'Create an Account'}
-          </h2>
-          <p className="text-gray-500">
-            {isLoginView ? 'Enter your credentials' : 'Join our community today!'}
-          </p>
+  // A standalone modal component for the Terms & Conditions
+  const TermsModal = () => (
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6">
+        <div className="flex justify-between items-center border-b pb-4 mb-4">
+          <h3 className="text-2xl font-bold text-gray-900">Terms and Conditions</h3>
+          <button
+            onClick={() => setShowTermsModal(false)}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLoginView && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="e.g., John"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="e.g., Doe"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="e.g., john.doe@example.com"
-                />
-              </div>
-            </>
-          )}
+        <div className="text-gray-600 space-y-4 text-sm">
+          <p>Welcome to our service. By creating an account, you agree to these Terms and Conditions. Please read them carefully. These terms constitute a legally binding agreement between you and [Your Company Name].</p>
+          <p><strong>1. Account Registration:</strong> You must provide accurate and complete information. You are responsible for maintaining the confidentiality of your password and for all activities that occur under your account.</p>
+          <p><strong>2. User Conduct:</strong> You agree not to use the service for any illegal or unauthorized purpose. You are solely responsible for your conduct and any data, text, files, information, usernames, images, graphics, photos, profiles, audio and video clips, sounds, musical works, works of authorship, applications, links and other content or materials (collectively, "Content") that you submit, post, or display on or via the service.</p>
+          <p><strong>3. Intellectual Property Rights:</strong> All intellectual property rights in the service and its original content are the exclusive property of [Your Company Name]. Your use of the service does not grant you any ownership rights to the service or its content.</p>
+          <p><strong>4. Termination:</strong> We may terminate or suspend your access to the service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+          <p><strong>5. Disclaimer of Warranties:</strong> The service is provided on an "as is" and "as available" basis. We make no warranties, expressed or implied, regarding the service.</p>
+          <p><strong>6. Limitation of Liability:</strong> In no event shall [Your Company Name] be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.</p>
+          <p><strong>7. Governing Law:</strong> These Terms shall be governed and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.</p>
+          <p><strong>8. Changes to Terms:</strong> We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our service after those revisions become effective, you agree to be bound by the revised terms.</p>
+          <p>By using our service, you acknowledge that you have read and understood these Terms and Conditions and agree to be bound by them.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Function to determine the correct form title based on state
+  const renderTitle = () => {
+    if (showForgotPassword) return 'Forgot Password';
+    if (showOtpInput) return 'Verify OTP';
+    if (showNewPasswordForm) return 'Create a New Password';
+    if (isLoginView) return 'Sign In';
+    return 'Create an Account';
+  };
+
+  // Function to determine the correct form subtitle based on state
+  const renderSubtitle = () => {
+    if (showForgotPassword) return 'Enter your email to receive an OTP';
+    if (showOtpInput) return 'Enter the OTP sent to your email';
+    if (showNewPasswordForm) return 'Create and confirm your new password';
+    if (isLoginView) return 'Enter your credentials';
+    return 'Join our community today!';
+  };
+
+  const renderForm = () => {
+    // Forgot Password - Step 1: Email Input
+    if (showForgotPassword) {
+      return (
+        <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-gray-700">Email Address</label>
             <input
-              type="text"
-              name="username"
+              type="email"
+              name="email"
               required
-              value={formData.username}
+              value={formData.email}
               onChange={handleChange}
               className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg"
+          >
+            Send OTP
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowForgotPassword(false);
+              setAlert(null);
+              // Back to login view
+              setIsLoginView(true);
+            }}
+            className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            &larr; Back to Login
+          </button>
+        </form>
+      );
+    }
+
+    // Forgot Password - Step 2: OTP Input
+    if (showOtpInput) {
+      return (
+        <form onSubmit={handleOtpSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Enter OTP</label>
+            <input
+              type="text"
+              name="otp"
+              required
+              value={formData.otp}
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              placeholder="e.g., 123456"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg"
+          >
+            Verify OTP
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowOtpInput(false);
+              setShowForgotPassword(true);
+              setAlert(null);
+            }}
+            className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            &larr; Back to Email
+          </button>
+        </form>
+      );
+    }
+
+    // Forgot Password - Step 3: New Password
+    if (showNewPasswordForm) {
+      return (
+        <form onSubmit={handleNewPasswordSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">New Password</label>
+            <input
+              type="password"
+              name="newPassword"
+              required
+              value={formData.newPassword}
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
             <input
               type="password"
-              name="password"
+              name="confirmPassword"
               required
-              value={formData.password}
+              value={formData.confirmPassword}
               onChange={handleChange}
               className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
@@ -508,31 +710,182 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
             type="submit"
             className="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg"
           >
-            {isLoginView ? 'Login' : 'Register'}
+            Reset Password
           </button>
         </form>
+      );
+    }
 
-        <div className="text-center mt-4 text-sm">
-          <p className="text-gray-500">
-            {isLoginView ? "Don't have an account?" : "Already have an account?"}
-            <button
-              onClick={() => setIsLoginView(!isLoginView)}
-              className="text-blue-600 ml-1 hover:text-blue-800 transition-colors font-medium"
-            >
-              {isLoginView ? 'Sign Up' : 'Sign In'}
-            </button>
-          </p>
-          <button
-            onClick={() => setAppState('homepage')}
-            className="mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            &larr; Back to Home
-          </button>
+    // Login/Register form (default view)
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!isLoginView && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                required
+                value={formData.firstName}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                placeholder="e.g., John"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                required
+                value={formData.lastName}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                placeholder="e.g., Doe"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                placeholder="e.g., john.doe@example.com"
+              />
+            </div>
+          </>
+        )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Username</label>
+          <input
+            type="text"
+            name="username"
+            required
+            value={formData.username}
+            onChange={handleChange}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Enter your username"
+          />
         </div>
-      </Card>
-    </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            name="password"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+
+        {isLoginView && (
+          <div className="flex justify-end text-sm">
+            <button
+              type="button"
+              onClick={() => {
+                setShowForgotPassword(true);
+                setAlert(null); // Clear alert on view change
+              }}
+              className="text-blue-600 hover:text-blue-800 transition-colors font-medium"
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
+
+        {!isLoginView && (
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="agree-to-terms"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="rounded text-green-600 focus:ring-green-500"
+            />
+            <label htmlFor="agree-to-terms" className="text-sm text-gray-600">
+              I agree to the
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-green-600 ml-1 hover:underline font-medium"
+              >
+                Terms & Conditions
+              </button>
+            </label>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          className="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-lg"
+        >
+          {isLoginView ? 'Login' : 'Register'}
+        </button>
+      </form>
+    );
+  };
+
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
+        {/* Tailwind CSS for fonts and basic styles, though a full build would use a CDN link or a local build process */}
+        <style>
+          {`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+          body { font-family: 'Inter', sans-serif; }
+          .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; }
+          .rounded-2xl { border-radius: 1rem; }
+          `}
+        </style>
+
+        {/* Render the modal if showTermsModal is true */}
+        {showTermsModal && <TermsModal />}
+
+        <Card className="max-w-md">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-900">{renderTitle()}</h2>
+            <p className="text-gray-500">{renderSubtitle()}</p>
+          </div>
+
+          {alert && <div className="mb-4"><Alert message={alert.message} isSuccess={alert.isSuccess} /></div>}
+          
+          {renderForm()}
+
+          {!showForgotPassword && !showOtpInput && !showNewPasswordForm && (
+            <div className="text-center mt-4 text-sm">
+              <p className="text-gray-500">
+                {isLoginView ? "Don't have an account?" : "Already have an account?"}
+                <button
+                  onClick={() => {
+                    setIsLoginView(!isLoginView);
+                    setAlert(null); // Clear alert on view change
+                  }}
+                  className="text-blue-600 ml-1 hover:text-blue-800 transition-colors font-medium"
+                >
+                  {isLoginView ? 'Sign Up' : 'Sign In'}
+                </button>
+              </p>
+              <button
+                onClick={() => setAppState('homepage')}
+                className="mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                &larr; Back to Home
+              </button>
+            </div>
+          )}
+        </Card>
+      </div>
+    </ErrorBoundary>
   );
 };
+
+
 
 // Updated Dashboard Component with service selection, forms, and transaction history
 const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
