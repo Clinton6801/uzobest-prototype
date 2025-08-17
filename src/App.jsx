@@ -41,6 +41,14 @@ const tailwindCSS = `
   .animate-slide-out-left {
     animation: slide-out-left 0.4s ease-out forwards;
   }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+  }
 `;
 
 // --- Reusable Components ---
@@ -123,7 +131,7 @@ const transactionHistory = [
 ];
 
 // --- Form Components for different services ---
-const AirtimeForm = ({ onSubmit, isLoading }) => {
+const AirtimeForm = ({ onSubmit, isLoading, onClose }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [amount, setAmount] = useState('');
 
@@ -133,40 +141,49 @@ const AirtimeForm = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Buy Airtime</h3>
-      <div>
-        <label htmlFor="airtime-phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
-        <input
-          id="airtime-phone"
-          type="tel"
-          required
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          placeholder="e.g., 08012345678"
-        />
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">Buy Airtime</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <div>
-        <label htmlFor="airtime-amount" className="block text-sm font-medium text-gray-700">Amount</label>
-        <input
-          id="airtime-amount"
-          type="number"
-          required
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          placeholder="Enter amount"
-        />
-      </div>
-      <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
-        {isLoading ? 'Processing...' : 'Pay for Airtime'}
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="airtime-phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input
+            id="airtime-phone"
+            type="tel"
+            required
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="e.g., 08012345678"
+          />
+        </div>
+        <div>
+          <label htmlFor="airtime-amount" className="block text-sm font-medium text-gray-700">Amount</label>
+          <input
+            id="airtime-amount"
+            type="number"
+            required
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Enter amount"
+          />
+        </div>
+        <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+          {isLoading ? 'Processing...' : 'Pay for Airtime'}
+        </button>
+      </form>
+    </div>
   );
 };
 
-const DataForm = ({ onSubmit, isLoading }) => {
+const DataForm = ({ onSubmit, isLoading, onClose }) => {
   const [provider, setProvider] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [planId, setPlanId] = useState('');
@@ -177,51 +194,60 @@ const DataForm = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Buy Data</h3>
-      <div>
-        <label htmlFor="data-provider" className="block text-sm font-medium text-gray-700">Network Provider</label>
-        <select
-          id="data-provider"
-          required
-          value={provider}
-          onChange={(e) => setProvider(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-          <option value="">Select network</option>
-          {Object.keys(dataPlans).map(p => (<option key={p} value={p}>{p}</option>))}
-        </select>
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">Buy Data</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <div>
-        <label htmlFor="data-phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
-        <input
-          id="data-phone"
-          type="tel"
-          required
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          placeholder="e.g., 08012345678" />
-      </div>
-      <div>
-        <label htmlFor="data-plan" className="block text-sm font-medium text-gray-700">Select Plan</label>
-        <select
-          id="data-plan"
-          required
-          value={planId}
-          onChange={(e) => setPlanId(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-          <option value="">Select data plan</option>
-          {provider && dataPlans[provider] && dataPlans[provider].map(plan => (<option key={plan.id} value={plan.id}>{plan.text}</option>))}
-        </select>
-      </div>
-      <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
-        {isLoading ? 'Processing...' : 'Pay for Data'}
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="data-provider" className="block text-sm font-medium text-gray-700">Network Provider</label>
+          <select
+            id="data-provider"
+            required
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+            <option value="">Select network</option>
+            {Object.keys(dataPlans).map(p => (<option key={p} value={p}>{p}</option>))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="data-phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input
+            id="data-phone"
+            type="tel"
+            required
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="e.g., 08012345678" />
+        </div>
+        <div>
+          <label htmlFor="data-plan" className="block text-sm font-medium text-gray-700">Select Plan</label>
+          <select
+            id="data-plan"
+            required
+            value={planId}
+            onChange={(e) => setPlanId(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+            <option value="">Select data plan</option>
+            {provider && dataPlans[provider] && dataPlans[provider].map(plan => (<option key={plan.id} value={plan.id}>{plan.text}</option>))}
+          </select>
+        </div>
+        <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+          {isLoading ? 'Processing...' : 'Pay for Data'}
+        </button>
+      </form>
+    </div>
   );
 };
 
-const ElectricityForm = ({ onSubmit, isLoading }) => {
+const ElectricityForm = ({ onSubmit, isLoading, onClose }) => {
   const [company, setCompany] = useState('');
   const [meterNumber, setMeterNumber] = useState('');
   const [amount, setAmount] = useState('');
@@ -232,50 +258,59 @@ const ElectricityForm = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Pay for Electricity</h3>
-      <div>
-        <label htmlFor="elec-company" className="block text-sm font-medium text-gray-700">Distribution Company</label>
-        <select
-          id="elec-company"
-          required
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-          <option value="">Select company</option>
-          {electricityCompanies.map(c => (<option key={c} value={c}>{c}</option>))}
-        </select>
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">Pay for Electricity</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <div>
-        <label htmlFor="elec-meter" className="block text-sm font-medium text-gray-700">Meter Number</label>
-        <input
-          id="elec-meter"
-          type="text"
-          required
-          value={meterNumber}
-          onChange={(e) => setMeterNumber(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          placeholder="Enter meter number" />
-      </div>
-      <div>
-        <label htmlFor="elec-amount" className="block text-sm font-medium text-gray-700">Amount</label>
-        <input
-          id="elec-amount"
-          type="number"
-          required
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          placeholder="Enter amount" />
-      </div>
-      <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
-        {isLoading ? 'Processing...' : 'Pay for Electricity'}
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="elec-company" className="block text-sm font-medium text-gray-700">Distribution Company</label>
+          <select
+            id="elec-company"
+            required
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+            <option value="">Select company</option>
+            {electricityCompanies.map(c => (<option key={c} value={c}>{c}</option>))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="elec-meter" className="block text-sm font-medium text-gray-700">Meter Number</label>
+          <input
+            id="elec-meter"
+            type="text"
+            required
+            value={meterNumber}
+            onChange={(e) => setMeterNumber(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Enter meter number" />
+        </div>
+        <div>
+          <label htmlFor="elec-amount" className="block text-sm font-medium text-gray-700">Amount</label>
+          <input
+            id="elec-amount"
+            type="number"
+            required
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Enter amount" />
+        </div>
+        <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+          {isLoading ? 'Processing...' : 'Pay for Electricity'}
+        </button>
+      </form>
+    </div>
   );
 };
 
-const CableTvForm = ({ onSubmit, isLoading }) => {
+const CableTvForm = ({ onSubmit, isLoading, onClose }) => {
   const [provider, setProvider] = useState('');
   const [smartcard, setSmartcard] = useState('');
 
@@ -285,35 +320,44 @@ const CableTvForm = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Upgrade your Cable</h3>
-      <div>
-        <label htmlFor="cable-provider" className="block text-sm font-medium text-gray-700">Provider</label>
-        <select
-          id="cable-provider"
-          required
-          value={provider}
-          onChange={(e) => setProvider(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-          <option value="">Select provider</option>
-          {cableTvProviders.map(p => (<option key={p} value={p}>{p}</option>))}
-        </select>
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">Upgrade your Cable</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <div>
-        <label htmlFor="cable-smartcard" className="block text-sm font-medium text-gray-700">Smartcard Number</label>
-        <input
-          id="cable-smartcard"
-          type="text"
-          required
-          value={smartcard}
-          onChange={(e) => setSmartcard(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          placeholder="Enter smartcard number" />
-      </div>
-      <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
-        {isLoading ? 'Processing...' : 'Pay for Cable TV'}
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="cable-provider" className="block text-sm font-medium text-gray-700">Provider</label>
+          <select
+            id="cable-provider"
+            required
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+            <option value="">Select provider</option>
+            {cableTvProviders.map(p => (<option key={p} value={p}>{p}</option>))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="cable-smartcard" className="block text-sm font-medium text-gray-700">Smartcard Number</label>
+          <input
+            id="cable-smartcard"
+            type="text"
+            required
+            value={smartcard}
+            onChange={(e) => setSmartcard(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Enter smartcard number" />
+        </div>
+        <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+          {isLoading ? 'Processing...' : 'Pay for Cable TV'}
+        </button>
+      </form>
+    </div>
   );
 };
 
@@ -959,13 +1003,11 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeForm, setActiveForm] = useState(null); // State to track the currently active form
   
   // Create refs for each section that needs to be scrolled to
   const profileRef = useRef(null);
-  const dataFormRef = useRef(null);
-  const airtimeFormRef = useRef(null);
-  const cableTvFormRef = useRef(null);
-  const electricityFormRef = useRef(null);
+  const formRef = useRef(null); // A single ref for the form container
   const transactionsRef = useRef(null);
 
   const userBalance = '₦1,500.00'; // Mock user balance
@@ -987,6 +1029,16 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [profileRef]);
+
+  // Use an effect to scroll to the form when it becomes active
+  useEffect(() => {
+    if (activeForm && formRef.current) {
+      // Use a slight delay to ensure the component has rendered and is visible
+      setTimeout(() => {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [activeForm]);
 
   // Universal Form Submission Handler for services and feedback
   const handleSubmit = async (service, formData) => {
@@ -1041,6 +1093,8 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
       setAlert({ message: 'Network error. Please check your connection.', isSuccess: false });
     } finally {
       setIsLoading(false);
+      // After a successful submission, you might want to close the form.
+      setActiveForm(null);
     }
   };
 
@@ -1052,36 +1106,41 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
     setIsProfileMenuOpen(false);
   };
   
-  // Handler for mobile menu items, uses refs to scroll to the correct section
+  // New handler to toggle the form visibility and scroll
+  const handleFormToggle = (serviceName) => {
+    // If the same service is clicked, close the form, otherwise open the new one
+    setActiveForm(prevForm => (prevForm === serviceName ? null : serviceName));
+    setIsMobileMenuOpen(false); // Close the side panel
+  };
+
+  // Handler for mobile menu items
   const handleMobileMenuItemClick = (item) => {
     if (item.action === 'fund') {
       setAlert({ message: "Funds added successfully!", isSuccess: true });
+      setIsMobileMenuOpen(false);
     } else if (item.action === 'transactions') {
       transactionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (item.service === 'Data') {
-      dataFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (item.service === 'Airtime') {
-      airtimeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (item.service === 'Cable TV') {
-      cableTvFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (item.service === 'Electricity') {
-      electricityFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setIsMobileMenuOpen(false);
+    } else if (item.service) {
+      handleFormToggle(item.service);
     }
-    setIsMobileMenuOpen(false); // Close the menu on selection
   };
   
   // Handler for service grid buttons on desktop/larger screens
   const handleServiceGridClick = (serviceName) => {
-    // This handler will also scroll to the correct section
-    if (serviceName === 'Data') {
-      dataFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (serviceName === 'Airtime') {
-      airtimeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (serviceName === 'Cable TV') {
-      cableTvFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (serviceName === 'Electricity') {
-      electricityFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    handleFormToggle(serviceName);
+  };
+  
+  const renderActiveForm = () => {
+    const FormComponent = serviceForms[activeForm];
+    if (FormComponent) {
+      return (
+        <Card>
+          <FormComponent onSubmit={handleSubmit} isLoading={isLoading} onClose={() => setActiveForm(null)} />
+        </Card>
+      );
     }
+    return null; // Don't render anything if no form is active
   };
 
   return (
@@ -1189,28 +1248,9 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
               </div>
             </div>
             
-            {/* Service Forms Section */}
-            <div className="space-y-8">
-              <div ref={airtimeFormRef}>
-                <Card>
-                  <AirtimeForm onSubmit={handleSubmit} isLoading={isLoading} />
-                </Card>
-              </div>
-              <div ref={dataFormRef}>
-                <Card>
-                  <DataForm onSubmit={handleSubmit} isLoading={isLoading} />
-                </Card>
-              </div>
-              <div ref={electricityFormRef}>
-                <Card>
-                  <ElectricityForm onSubmit={handleSubmit} isLoading={isLoading} />
-                </Card>
-              </div>
-              <div ref={cableTvFormRef}>
-                <Card>
-                  <CableTvForm onSubmit={handleSubmit} isLoading={isLoading} />
-                </Card>
-              </div>
+            {/* Service Form Section */}
+            <div ref={formRef} className="space-y-8">
+              {renderActiveForm()}
             </div>
           </div>
 
