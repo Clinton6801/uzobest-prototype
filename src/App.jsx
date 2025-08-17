@@ -998,13 +998,223 @@ const SideMenuPanel = ({ isOpen, onClose, onMenuItemClick }) => {
 };
 
 
+// NEW: Profile Actions Component
+const ProfileActions = ({
+  loggedInUser,
+  setLoggedInUser,
+  setAppState,
+  setAlert,
+  onBackToDashboard,
+  action,
+  setAction
+}) => {
+  const [newUsername, setNewUsername] = useState(loggedInUser);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [deleteUsername, setDeleteUsername] = useState('');
+
+  // Edit Profile Form
+  const renderEditProfile = () => (
+    <div className="animate-fade-in">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h3>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
+          <input
+            id="username"
+            type="text"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="New Username"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Avatar</label>
+          <div className="mt-1 p-4 bg-gray-100 border-2 border-gray-200 rounded-lg text-center text-gray-500">
+            [Placeholder for Avatar Change]
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            setLoggedInUser(newUsername);
+            setAlert({ message: 'Profile updated successfully!', isSuccess: true });
+            onBackToDashboard();
+          }}
+          className="w-full px-6 py-3 mt-4 font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-lg"
+        >
+          Save Changes
+        </button>
+        <button
+          onClick={onBackToDashboard}
+          className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          &larr; Back to Dashboard
+        </button>
+      </div>
+    </div>
+  );
+
+  // Change Password Form
+  const renderChangePassword = () => (
+    <div className="animate-fade-in">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">Change Password</h3>
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="old-password" className="block text-sm font-medium text-gray-700">Old Password</label>
+          <input
+            id="old-password"
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+        <div>
+          <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">New Password</label>
+          <input
+            id="new-password"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+        <div>
+          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+          <input
+            id="confirm-password"
+            type="password"
+            value={confirmNewPassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+        <button
+          onClick={() => {
+            if (newPassword !== confirmNewPassword) {
+              setAlert({ message: 'New passwords do not match!', isSuccess: false });
+            } else {
+              setAlert({ message: 'Password changed successfully!', isSuccess: true });
+              setOldPassword('');
+              setNewPassword('');
+              setConfirmNewPassword('');
+              onBackToDashboard();
+            }
+          }}
+          className="w-full px-6 py-3 mt-4 font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-lg"
+        >
+          Change Password
+        </button>
+        <button
+          onClick={onBackToDashboard}
+          className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          &larr; Back to Dashboard
+        </button>
+      </div>
+    </div>
+  );
+
+  // Logout Confirmation Modal
+  const renderLogoutConfirmation = () => (
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <Card className="max-w-md text-center animate-fade-in-down">
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Are you sure you want to log out?</h3>
+        <p className="text-gray-500 mb-6">You will need to sign in again to access your account.</p>
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={() => {
+              setAppState('homepage');
+              setLoggedInUser(null);
+              setAlert({ message: 'You have been logged out successfully!', isSuccess: true });
+            }}
+            className="px-6 py-2 bg-red-600 text-white rounded-full font-semibold hover:bg-red-700 transition-colors"
+          >
+            Yes, Logout
+          </button>
+          <button
+            onClick={() => setAction(null)}
+            className="px-6 py-2 bg-gray-200 text-gray-800 rounded-full font-semibold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </Card>
+    </div>
+  );
+
+  // Delete Account Confirmation Modal
+  const renderDeleteAccountConfirmation = () => (
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <Card className="max-w-md text-center animate-fade-in-down">
+        <h3 className="text-xl font-bold text-red-600 mb-4">Are you absolutely sure?</h3>
+        <p className="text-gray-500 mb-4">
+          This action is permanent and cannot be undone. To confirm, please type your username below.
+        </p>
+        <input
+          type="text"
+          value={deleteUsername}
+          onChange={(e) => setDeleteUsername(e.target.value)}
+          className="w-full px-4 py-2 mb-4 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+          placeholder="Enter your username"
+        />
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={() => {
+              if (deleteUsername === loggedInUser) {
+                setAppState('homepage');
+                setLoggedInUser(null);
+                setAlert({ message: 'Your account has been deleted permanently.', isSuccess: true });
+              } else {
+                setAlert({ message: 'Incorrect username. Account not deleted.', isSuccess: false });
+                setAction(null);
+              }
+            }}
+            disabled={deleteUsername !== loggedInUser}
+            className={`px-6 py-2 rounded-full font-semibold transition-colors ${
+              deleteUsername !== loggedInUser
+                ? 'bg-red-300 cursor-not-allowed'
+                : 'bg-red-600 text-white hover:bg-red-700'
+            }`}
+          >
+            Delete Account
+          </button>
+          <button
+            onClick={() => setAction(null)}
+            className="px-6 py-2 bg-gray-200 text-gray-800 rounded-full font-semibold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </Card>
+    </div>
+  );
+
+  switch (action) {
+    case 'editProfile':
+      return renderEditProfile();
+    case 'changePassword':
+      return renderChangePassword();
+    case 'confirmLogout':
+      return renderLogoutConfirmation();
+    case 'confirmDelete':
+      return renderDeleteAccountConfirmation();
+    default:
+      return null;
+  }
+};
+
+
 // Updated Dashboard Component with side menu and scroll-to-form functionality
 const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeForm, setActiveForm] = useState(null); // State to track the currently active form
-  
+  const [currentProfileView, setCurrentProfileView] = useState(null); // 'editProfile', 'changePassword', 'confirmLogout', 'confirmDelete'
+
   // Create refs for each section that needs to be scrolled to
   const profileRef = useRef(null);
   const formRef = useRef(null); // A single ref for the form container
@@ -1099,11 +1309,9 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   };
 
   const handleProfileAction = (action) => {
-    setAlert({
-      message: `"${action}" feature is coming soon!`,
-      isSuccess: true,
-    });
-    setIsProfileMenuOpen(false);
+    setIsProfileMenuOpen(false); // Close the dropdown menu
+    setCurrentProfileView(action); // Set the new view
+    setActiveForm(null); // Hide any open service forms
   };
   
   // New handler to toggle the form visibility and scroll
@@ -1111,6 +1319,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
     // If the same service is clicked, close the form, otherwise open the new one
     setActiveForm(prevForm => (prevForm === serviceName ? null : serviceName));
     setIsMobileMenuOpen(false); // Close the side panel
+    setCurrentProfileView(null); // Hide any profile views
   };
 
   // Handler for mobile menu items
@@ -1143,74 +1352,31 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
     return null; // Don't render anything if no form is active
   };
 
-  return (
-    <div className="bg-gray-100 min-h-screen font-sans">
-      <style>{tailwindCSS}</style>
-      
-      {/* Side Menu Panel (visible on all screens but controlled by state) */}
-      <SideMenuPanel
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        onMenuItemClick={handleMobileMenuItemClick}
-      />
-      
-      {/* Header */}
-      <nav className="bg-white shadow-sm py-4 mb-8">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          {/* Mobile menu button and Brand */}
-          <div className="flex items-center">
-            {/* Mobile menu button, visible only on smaller screens */}
-            <button
-              id="mobile-menu-button"
-              onClick={() => setIsMobileMenuOpen(true)} // Open side panel
-              className="md:hidden p-2 mr-2 text-gray-700 hover:text-indigo-600 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <h1 className="text-2xl font-bold text-indigo-600">AjalaGSM</h1>
-          </div>
-          
-          <div className="flex items-center space-x-4 relative" ref={profileRef}>
-            {/* Profile Button (Desktop & Mobile) */}
-            <button
-              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-110"
-              aria-label="User Profile Menu"
-            >
-              {firstLetter}
-            </button>
-            {/* Profile Dropdown Menu */}
-            {isProfileMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-10 animate-fade-in-down">
-                <button
-                  onClick={() => handleProfileAction('Edit Profile')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Edit Profile
-                </button>
-                <button
-                  onClick={() => handleProfileAction('Change Password')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Change Password
-                </button>
-                <div className="border-t border-gray-200 mt-2 pt-2">
-                  <button
-                    onClick={() => setAppState('homepage')}
-                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+  const renderDashboardContent = () => {
+    // If a profile action view is set, render that instead of the dashboard
+    if (currentProfileView) {
+      return (
+        <div className="flex justify-center items-start lg:items-center py-8">
+          <Card className="w-full max-w-lg">
+            <ProfileActions
+              loggedInUser={loggedInUser}
+              setLoggedInUser={(username) => {
+                setLoggedInUser(username);
+                setCurrentProfileView(null); // Go back to dashboard after username change
+              }}
+              setAppState={setAppState}
+              setAlert={setAlert}
+              onBackToDashboard={() => setCurrentProfileView(null)}
+              action={currentProfileView}
+              setAction={setCurrentProfileView}
+            />
+          </Card>
         </div>
-      </nav>
+      );
+    }
 
-      {/* Main Content Area */}
+    // Otherwise, render the main dashboard content
+    return (
       <main className="container mx-auto px-4 py-8">
         <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-6">Welcome back, {username}!</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1266,6 +1432,83 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
           </div>
         </div>
       </main>
+    );
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen font-sans">
+      <style>{tailwindCSS}</style>
+      
+      {/* Side Menu Panel (visible on all screens but controlled by state) */}
+      <SideMenuPanel
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onMenuItemClick={handleMobileMenuItemClick}
+      />
+      
+      {/* Header */}
+      <nav className="bg-white shadow-sm py-4 mb-8">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          {/* Mobile menu button and Brand */}
+          <div className="flex items-center">
+            {/* Mobile menu button, visible only on smaller screens */}
+            <button
+              id="mobile-menu-button"
+              onClick={() => setIsMobileMenuOpen(true)} // Open side panel
+              className="md:hidden p-2 mr-2 text-gray-700 hover:text-indigo-600 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-2xl font-bold text-indigo-600">AjalaGSM</h1>
+          </div>
+          
+          <div className="flex items-center space-x-4 relative" ref={profileRef}>
+            {/* Profile Button (Desktop & Mobile) */}
+            <button
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-110"
+              aria-label="User Profile Menu"
+            >
+              {firstLetter}
+            </button>
+            {/* Profile Dropdown Menu */}
+            {isProfileMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-10 animate-fade-in-down">
+                <button
+                  onClick={() => handleProfileAction('editProfile')}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => handleProfileAction('changePassword')}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Change Password
+                </button>
+                <div className="border-t border-gray-200 mt-2 pt-2">
+                  <button
+                    onClick={() => handleProfileAction('confirmLogout')}
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                  <button
+                    onClick={() => handleProfileAction('confirmDelete')}
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {renderDashboardContent()}
 
       {/* Footer */}
       <footer className="bg-white py-8 mt-12 text-center text-gray-500">
