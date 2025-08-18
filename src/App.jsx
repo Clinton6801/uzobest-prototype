@@ -485,7 +485,7 @@ class ErrorBoundary extends Component {
 }
 
 // Main Auth Page Component (Login & Register)
-const AuthPage = ({ setAppState, setLoggedInUser }) => {
+const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
   // State to toggle between Login, Register, and now, Forgot Password views
   const [isLoginView, setIsLoginView] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -503,7 +503,9 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [alert, setAlert] = useState(null);
+  
+  // Use a constant for the backend URL
+  const BACKEND_URL = 'https://halfat-backend.onrender.com';
 
   // Log state changes for debugging
   useEffect(() => {
@@ -525,70 +527,82 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
     const { email } = formData;
 
     try {
-      // In a real application, you would make an API call to send an OTP
-      // const response = await fetch('YOUR_SEND_OTP_API_ENDPOINT_HERE', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
-      // const data = await response.json();
+      // API call to send an OTP
+      const response = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
 
-      // if (response.ok) {
-      //   setAlert({ message: 'An OTP has been sent to your email.', isSuccess: true });
-      //   setShowForgotPassword(false);
-      //   setShowOtpInput(true);
-      // } else {
-      //   setAlert({ message: data.message || 'An error occurred. Please try again.', isSuccess: false });
-      // }
-
-      // --- Mock success for demonstration purposes ---
-      console.log('Mock send OTP API call with data:', { email });
-      setAlert({ message: 'An OTP has been sent to your email.', isSuccess: true });
-      setShowForgotPassword(false);
-      setShowOtpInput(true);
-      setFormData(prev => ({ ...prev, otp: '123456' })); // Mock OTP for testing
-      // --- End of mock logic ---
-
+      if (response.ok) {
+        setAlert({ message: 'An OTP has been sent to your email.', isSuccess: true });
+        setShowForgotPassword(false);
+        setShowOtpInput(true);
+      } else {
+        setAlert({ message: data.message || 'An error occurred. Please try again.', isSuccess: false });
+      }
     } catch (error) {
+      console.error('API call failed:', error);
       setAlert({ message: 'Network error. Please try again later.', isSuccess: false });
     }
   };
 
-  const handleOtpSubmit = (e) => {
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    // In a real application, you would make an API call to verify the OTP
-    // const response = await fetch('YOUR_VERIFY_OTP_API_ENDPOINT_HERE', { ... });
-    // if (response.ok) { ... }
+    const { email, otp } = formData;
 
-    // --- Mock verification ---
-    if (formData.otp === '123456') { // Check against the mock OTP
-      setAlert({ message: 'OTP verified successfully.', isSuccess: true });
-      setShowOtpInput(false);
-      setShowNewPasswordForm(true);
-    } else {
-      setAlert({ message: 'Invalid OTP. Please try again.', isSuccess: false });
+    try {
+      // API call to verify the OTP
+      const response = await fetch(`${BACKEND_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setAlert({ message: 'OTP verified successfully.', isSuccess: true });
+        setShowOtpInput(false);
+        setShowNewPasswordForm(true);
+      } else {
+        setAlert({ message: data.message || 'Invalid OTP. Please try again.', isSuccess: false });
+      }
+    } catch (error) {
+      console.error('API call failed:', error);
+      setAlert({ message: 'Network error. Please try again later.', isSuccess: false });
     }
-    // --- End of mock logic ---
   };
 
-  const handleNewPasswordSubmit = (e) => {
+  const handleNewPasswordSubmit = async (e) => {
     e.preventDefault();
-    const { newPassword, confirmPassword } = formData;
+    const { email, newPassword, confirmPassword } = formData;
 
     if (newPassword !== confirmPassword) {
       setAlert({ message: 'Passwords do not match.', isSuccess: false });
       return;
     }
 
-    // In a real application, you would make an API call to set the new password
-    // const response = await fetch('YOUR_SET_PASSWORD_API_ENDPOINT_HERE', { ... });
+    try {
+      // API call to set the new password
+      const response = await fetch(`${BACKEND_URL}/auth/update-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword }),
+      });
+      const data = await response.json();
 
-    // --- Mock password update ---
-    console.log('Mock password update for email:', formData.email, 'with new password:', newPassword);
-    setAlert({ message: 'Your password has been reset successfully. You can now log in.', isSuccess: true });
-    setShowNewPasswordForm(false);
-    setIsLoginView(true);
-    // --- End of mock logic ---
+      if (response.ok) {
+        setAlert({ message: 'Your password has been reset successfully. You can now log in.', isSuccess: true });
+        setShowNewPasswordForm(false);
+        setIsLoginView(true);
+      } else {
+        setAlert({ message: data.message || 'Failed to reset password. Please try again.', isSuccess: false });
+      }
+    } catch (error) {
+      console.error('API call failed:', error);
+      setAlert({ message: 'Network error. Please try again later.', isSuccess: false });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -605,24 +619,33 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
     }
 
     if (isLoginView) {
-      endpoint = 'YOUR_LOGIN_API_ENDPOINT_HERE';
+      endpoint = `${BACKEND_URL}/auth/login`;
       body = { username, password };
       successMessage = 'Login successful!';
     } else {
-      endpoint = 'YOUR_REGISTER_API_ENDPOINT_HERE';
+      endpoint = `${BACKEND_URL}/auth/register`;
       body = { username, email, password, firstName, lastName };
       successMessage = 'Registration successful! You can now log in.';
     }
 
     try {
-      // --- Mock success for demonstration purposes ---
-      console.log('Mock API call with data:', body);
-      setLoggedInUser(username);
-      setAppState('dashboard');
-      setAlert({ message: successMessage, isSuccess: true });
-      // --- End of mock logic ---
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
 
+      if (response.ok) {
+        // Assume the backend returns user data, including their username
+        setLoggedInUser(data.user.username);
+        setAppState('dashboard');
+        setAlert({ message: successMessage, isSuccess: true });
+      } else {
+        setAlert({ message: data.message || `An error occurred.`, isSuccess: false });
+      }
     } catch (error) {
+      console.error('API call failed:', error);
       setAlert({ message: 'Network error. Please try again later.', isSuccess: false });
     }
   };
@@ -924,8 +947,6 @@ const AuthPage = ({ setAppState, setLoggedInUser }) => {
             <p className="text-gray-500">{renderSubtitle()}</p>
           </div>
 
-          {alert && <div className="mb-4"><Alert message={alert.message} isSuccess={alert.isSuccess} /></div>}
-          
           {renderForm()}
 
           {!showForgotPassword && !showOtpInput && !showNewPasswordForm && (
@@ -998,6 +1019,69 @@ const SideMenuPanel = ({ isOpen, onClose, onMenuItemClick }) => {
 };
 
 
+// NEW: Fund Wallet Form
+const FundWalletForm = ({ onSubmit, isLoading, onClose }) => {
+  const [amount, setAmount] = useState('');
+  const [method, setMethod] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit('Fund Wallet', { amount, method });
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">Fund Your Wallet</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="fund-amount" className="block text-sm font-medium text-gray-700">Amount to Fund</label>
+          <input
+            id="fund-amount"
+            type="number"
+            required
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            placeholder="Enter amount"
+          />
+        </div>
+        <div>
+          <label htmlFor="fund-method" className="block text-sm font-medium text-gray-700">Payment Method</label>
+          <select
+            id="fund-method"
+            required
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+            <option value="">Select method</option>
+            <option value="card">Credit/Debit Card</option>
+            <option value="bank_transfer">Bank Transfer</option>
+          </select>
+        </div>
+        <button type="submit" disabled={isLoading} className={`w-full px-6 py-3 mt-6 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+          {isLoading ? 'Processing...' : 'Proceed to Payment'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+// Map of service names to their form components, now including the Fund Wallet form
+const dashboardForms = {
+  Airtime: AirtimeForm,
+  Data: DataForm,
+  Electricity: ElectricityForm,
+  'Cable TV': CableTvForm,
+  'Fund Wallet': FundWalletForm
+};
+
 // NEW: Profile Actions Component
 const ProfileActions = ({
   loggedInUser,
@@ -1006,13 +1090,81 @@ const ProfileActions = ({
   setAlert,
   onBackToDashboard,
   action,
-  setAction
+  setAction,
+  BACKEND_URL
 }) => {
   const [newUsername, setNewUsername] = useState(loggedInUser);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [deleteUsername, setDeleteUsername] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Function to handle the profile update API call
+  const handleEditProfile = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/profile`, {
+        method: 'GET', // Or PUT/PATCH depending on your backend
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${loggedInUser.token}` // Assuming you have a token
+        },
+        body: JSON.stringify({ username: newUsername }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setLoggedInUser(newUsername);
+        setAlert({ message: 'Profile updated successfully!', isSuccess: true });
+      } else {
+        setAlert({ message: data.message || 'Failed to update profile.', isSuccess: false });
+      }
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      setAlert({ message: 'Network error. Could not update profile.', isSuccess: false });
+    } finally {
+      setIsLoading(false);
+      onBackToDashboard();
+    }
+  };
+
+  // Function to handle the password change API call
+  const handleChangePassword = async () => {
+    setIsLoading(true);
+    if (newPassword !== confirmNewPassword) {
+      setAlert({ message: 'New passwords do not match!', isSuccess: false });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${loggedInUser.token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setAlert({ message: 'Password changed successfully!', isSuccess: true });
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmNewPassword('');
+      } else {
+        setAlert({ message: data.message || 'Failed to change password.', isSuccess: false });
+      }
+    } catch (error) {
+      console.error('Password change failed:', error);
+      setAlert({ message: 'Network error. Could not change password.', isSuccess: false });
+    } finally {
+      setIsLoading(false);
+      onBackToDashboard();
+    }
+  };
 
   // Edit Profile Form
   const renderEditProfile = () => (
@@ -1037,14 +1189,11 @@ const ProfileActions = ({
           </div>
         </div>
         <button
-          onClick={() => {
-            setLoggedInUser(newUsername);
-            setAlert({ message: 'Profile updated successfully!', isSuccess: true });
-            onBackToDashboard();
-          }}
-          className="w-full px-6 py-3 mt-4 font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-lg"
+          onClick={handleEditProfile}
+          disabled={isLoading}
+          className={`w-full px-6 py-3 mt-4 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
         >
-          Save Changes
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </button>
         <button
           onClick={onBackToDashboard}
@@ -1092,20 +1241,11 @@ const ProfileActions = ({
           />
         </div>
         <button
-          onClick={() => {
-            if (newPassword !== confirmNewPassword) {
-              setAlert({ message: 'New passwords do not match!', isSuccess: false });
-            } else {
-              setAlert({ message: 'Password changed successfully!', isSuccess: true });
-              setOldPassword('');
-              setNewPassword('');
-              setConfirmNewPassword('');
-              onBackToDashboard();
-            }
-          }}
-          className="w-full px-6 py-3 mt-4 font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-lg"
+          onClick={handleChangePassword}
+          disabled={isLoading}
+          className={`w-full px-6 py-3 mt-4 font-semibold rounded-xl transition-colors shadow-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
         >
-          Change Password
+          {isLoading ? 'Changing...' : 'Change Password'}
         </button>
         <button
           onClick={onBackToDashboard}
@@ -1219,6 +1359,10 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   const profileRef = useRef(null);
   const formRef = useRef(null); // A single ref for the form container
   const transactionsRef = useRef(null);
+  
+  // 👈 New constant for your backend API URL.
+  // 👉 Update this URL with your actual API endpoint.
+  const BACKEND_URL = 'https://your-api-domain.com/api/v1';
 
   const userBalance = '₦1,500.00'; // Mock user balance
   const username = loggedInUser || 'User'; // Use the logged-in user name or a generic "User"
@@ -1253,53 +1397,86 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   // Universal Form Submission Handler for services and feedback
   const handleSubmit = async (service, formData) => {
     setIsLoading(true);
-    let endpoint = '';
+
+    // Map service names to their specific API paths
+    const serviceEndpoints = {
+      Airtime: 'purchase/airtime',
+      Data: 'purchase/data',
+      Electricity: 'purchase/electricity',
+      'Cable TV': 'purchase/cabletv',
+      Feedback: 'feedback',
+      'Fund Wallet': 'wallet/fund'
+    };
+    
+    // Construct the full API URL using the base URL and the service path
+    const endpoint = `${BACKEND_URL}/${serviceEndpoints[service]}`;
+    
     let successMessage = '';
     let errorMessage = '';
 
-    if (service === 'Airtime') {
-      endpoint = 'YOUR_AIRTIME_API_ENDPOINT_HERE'; // 👈 **Backend URL for Airtime**
-      successMessage = 'Airtime transaction successful!';
-      errorMessage = 'Failed to purchase airtime.';
-    } else if (service === 'Data') {
-      endpoint = 'YOUR_DATA_API_ENDPOINT_HERE'; // 👈 **Backend URL for Data**
-      successMessage = 'Data transaction successful!';
-      errorMessage = 'Failed to purchase data.';
-    } else if (service === 'Electricity') {
-      endpoint = 'YOUR_ELECTRICITY_API_ENDPOINT_HERE'; // 👈 **Backend URL for Electricity**
-      successMessage = 'Electricity payment successful!';
-      errorMessage = 'Failed to pay for electricity.';
-    } else if (service === 'Cable TV') {
-      endpoint = 'YOUR_CABLETV_API_ENDPOINT_HERE'; // 👈 **Backend URL for Cable TV**
-      successMessage = 'Cable TV payment successful!';
-      errorMessage = 'Failed to pay for cable TV.';
-    } else if (service === 'Feedback') {
-      endpoint = 'YOUR_FEEDBACK_API_ENDPOINT_HERE'; // 👈 **Backend URL for Feedback**
-      successMessage = 'Thank you for your feedback! We appreciate your input.';
-      errorMessage = 'Failed to submit feedback.';
+    // Set messages based on the service being used
+    switch (service) {
+      case 'Airtime':
+        successMessage = 'Airtime transaction successful!';
+        errorMessage = 'Failed to purchase airtime.';
+        break;
+      case 'Data':
+        successMessage = 'Data transaction successful!';
+        errorMessage = 'Failed to purchase data.';
+        break;
+      case 'Electricity':
+        successMessage = 'Electricity payment successful!';
+        errorMessage = 'Failed to pay for electricity.';
+        break;
+      case 'Cable TV':
+        successMessage = 'Cable TV payment successful!';
+        errorMessage = 'Failed to pay for cable TV.';
+        break;
+      case 'Feedback':
+        successMessage = 'Thank you for your feedback! We appreciate your input.';
+        errorMessage = 'Failed to submit feedback.';
+        break;
+      case 'Fund Wallet':
+        successMessage = 'Wallet funding successful! We are verifying the payment...';
+        errorMessage = 'Failed to fund wallet.';
+        break;
+      default:
+        successMessage = 'Transaction successful!';
+        errorMessage = 'An unknown error occurred.';
     }
 
     try {
-      // In a real application, you would make an API call here.
-      // const response = await fetch(endpoint, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
-      // if (response.ok) {
-      //   setAlert({ message: successMessage, isSuccess: true });
-      // } else {
-      //   const data = await response.json();
-      //   setAlert({ message: data.message || errorMessage, isSuccess: false });
-      // }
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
 
-      // --- Mock success for demonstration purposes ---
-      console.log(`Mock API call to ${service} with data:`, formData);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setAlert({ message: successMessage, isSuccess: true });
-      // --- End of mock logic ---
+      if (response.ok) {
+        setAlert({ message: successMessage, isSuccess: true });
+        if (service === 'Fund Wallet') {
+          // After a successful funding request, verify the payment
+          // Note: This is a simplified sequential call. In a real app,
+          // the verification would likely be a separate user action or webhook.
+          const verifyResponse = await fetch(`${BACKEND_URL}/wallet/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transactionId: data.transactionId }), // Assuming the fund API returns a transaction ID
+          });
+          const verifyData = await verifyResponse.json();
+          if (verifyResponse.ok) {
+            setAlert({ message: 'Payment verified successfully!', isSuccess: true });
+          } else {
+            setAlert({ message: verifyData.message || 'Payment verification failed.', isSuccess: false });
+          }
+        }
+      } else {
+        setAlert({ message: data.message || errorMessage, isSuccess: false });
+      }
 
     } catch (error) {
+      console.error('API call failed:', error);
       setAlert({ message: 'Network error. Please check your connection.', isSuccess: false });
     } finally {
       setIsLoading(false);
@@ -1325,8 +1502,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   // Handler for mobile menu items
   const handleMobileMenuItemClick = (item) => {
     if (item.action === 'fund') {
-      setAlert({ message: "Funds added successfully!", isSuccess: true });
-      setIsMobileMenuOpen(false);
+      handleFormToggle('Fund Wallet');
     } else if (item.action === 'transactions') {
       transactionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setIsMobileMenuOpen(false);
@@ -1341,7 +1517,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   };
   
   const renderActiveForm = () => {
-    const FormComponent = serviceForms[activeForm];
+    const FormComponent = dashboardForms[activeForm];
     if (FormComponent) {
       return (
         <Card>
@@ -1369,6 +1545,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
               onBackToDashboard={() => setCurrentProfileView(null)}
               action={currentProfileView}
               setAction={setCurrentProfileView}
+              BACKEND_URL={BACKEND_URL}
             />
           </Card>
         </div>
@@ -1388,7 +1565,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
               <p className="text-5xl font-extrabold mt-2">{userBalance}</p>
               <p className="text-sm mt-4 opacity-80">Fund your wallet to make payments with ease.</p>
               <button
-                onClick={() => setAlert({ message: "Funds added successfully!", isSuccess: true })}
+                onClick={() => handleFormToggle('Fund Wallet')}
                 className="mt-4 px-6 py-3 bg-white text-indigo-600 rounded-full font-semibold hover:bg-gray-100 transition-colors"
               >
                 Fund Wallet
