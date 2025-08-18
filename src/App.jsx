@@ -528,7 +528,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
 
     try {
       // API call to send an OTP
-      const response = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+      const response = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -554,7 +554,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
 
     try {
       // API call to verify the OTP
-      const response = await fetch(`${BACKEND_URL}/auth/verify-otp`, {
+      const response = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -619,11 +619,11 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     }
 
     if (isLoginView) {
-      endpoint = `${BACKEND_URL}/auth/login`;
+      endpoint = `${BACKEND_URL}/api/auth/login`;
       body = { username, password };
       successMessage = 'Login successful!';
     } else {
-      endpoint = `${BACKEND_URL}/auth/register`;
+      endpoint = `${BACKEND_URL}/api/auth/register`;
       body = { username, email, password, firstName, lastName };
       successMessage = 'Registration successful! You can now log in.';
     }
@@ -1104,7 +1104,7 @@ const ProfileActions = ({
   const handleEditProfile = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/auth/profile`, {
+      const response = await fetch(`${BACKEND_URL}/api/auth/profile`, {
         method: 'GET', // Or PUT/PATCH depending on your backend
         headers: {
           'Content-Type': 'application/json',
@@ -1400,12 +1400,12 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
 
     // Map service names to their specific API paths
     const serviceEndpoints = {
-      Airtime: 'purchase/airtime',
-      Data: 'purchase/data',
-      Electricity: 'purchase/electricity',
-      'Cable TV': 'purchase/cabletv',
-      Feedback: 'feedback',
-      'Fund Wallet': 'wallet/fund'
+      Airtime: 'api/purchase/airtime',
+      Data: 'api/purchase/data',
+      Electricity: 'api/purchase/electricity',
+      'Cable TV': 'api/purchase/cabletv',
+      Feedback: 'api/feedback',
+      'Fund Wallet': 'api/wallet/fund'
     };
     
     // Construct the full API URL using the base URL and the service path
@@ -1459,7 +1459,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
           // After a successful funding request, verify the payment
           // Note: This is a simplified sequential call. In a real app,
           // the verification would likely be a separate user action or webhook.
-          const verifyResponse = await fetch(`${BACKEND_URL}/wallet/verify`, {
+          const verifyResponse = await fetch(`${BACKEND_URL}api/wallet/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ transactionId: data.transactionId }), // Assuming the fund API returns a transaction ID
