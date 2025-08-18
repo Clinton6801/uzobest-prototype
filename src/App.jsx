@@ -1362,7 +1362,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   
   // 👈 New constant for your backend API URL.
   // 👉 Update this URL with your actual API endpoint.
-  const BACKEND_URL = 'https://your-api-domain.com/api/v1';
+  const BACKEND_URL = 'https://halfat-backend.onrender.com';
 
   const userBalance = '₦1,500.00'; // Mock user balance
   const username = loggedInUser || 'User'; // Use the logged-in user name or a generic "User"
