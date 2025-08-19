@@ -635,7 +635,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert =() => {} }) => {
 
       if (response.ok) {
         // Assume the backend returns user data, including their email
-        setLoggedInUser(data.user.email);
+        setLoggedInUser(data.user.firstName);
         setAppState('dashboard');
         setAlert({ message: successMessage, isSuccess: true });
       } else {
@@ -1374,8 +1374,8 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
   const BACKEND_URL = 'https://halfat-backend.onrender.com';
 
   const userBalance = '₦1,500.00'; // Mock user balance
-  const username = loggedInUser || 'User'; // Use the logged-in user name or a generic "User"
-  const firstLetter = username.charAt(0).toUpperCase();
+  const firstName = loggedInUser || 'User'; // Use the logged-in user name or a generic "User"
+  const firstLetter = firstName.charAt(0).toUpperCase();
 
   // Effect to handle clicks outside the profile menu
   useEffect(() => {
@@ -1545,8 +1545,8 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
           <Card className="w-full max-w-lg">
             <ProfileActions
               loggedInUser={loggedInUser}
-              setLoggedInUser={(username) => {
-                setLoggedInUser(username);
+              setLoggedInUser={(firstName) => {
+                setLoggedInUser(firstName);
                 setCurrentProfileView(null); // Go back to dashboard after username change
               }}
               setAppState={setAppState}
