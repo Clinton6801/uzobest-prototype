@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Component } from 'react';
+import React, { useState, useRef, useEffect,useCallback, Component } from 'react';
 
 // Tailwind CSS keyframes for animations
 const tailwindCSS = `
@@ -485,25 +485,25 @@ class ErrorBoundary extends Component {
 }
 
 // Main Auth Page Component (Login & Register)
-const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
+const AuthPage = ({ setAppState, setLoggedInUser, setAlert =() => {} }) => {
   // State to toggle between Login, Register, and now, Forgot Password views
   const [isLoginView, setIsLoginView] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     firstName: '',
     lastName: '',
+    phone: '', // Add new state for phone number
     otp: '',
     newPassword: '',
     confirmPassword: ''
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  
+
   // Use a constant for the backend URL
   const BACKEND_URL = 'https://halfat-backend.onrender.com';
 
@@ -527,7 +527,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     const { email } = formData;
 
     try {
-      // API call to send an OTP
       const response = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -553,7 +552,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     const { email, otp } = formData;
 
     try {
-      // API call to verify the OTP
       const response = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -584,7 +582,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     }
 
     try {
-      // API call to set the new password
       const response = await fetch(`${BACKEND_URL}/auth/update-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -607,12 +604,11 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { username, email, password, firstName, lastName } = formData;
+    const { email, password, firstName, lastName, phone } = formData;
     let endpoint = '';
     let body = {};
     let successMessage = '';
 
-    // If it's the registration view, we must check if the user agreed to terms
     if (!isLoginView && !agreedToTerms) {
       setAlert({ message: 'You must agree to the Terms & Conditions.', isSuccess: false });
       return;
@@ -620,11 +616,12 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
 
     if (isLoginView) {
       endpoint = `${BACKEND_URL}/api/auth/login`;
-      body = { username, password };
+      body = { email, password };
       successMessage = 'Login successful!';
     } else {
       endpoint = `${BACKEND_URL}/api/auth/register`;
-      body = { username, email, password, firstName, lastName };
+      // We are now sending all registration fields including phone number
+      body = { email, password, firstName, lastName, phone };
       successMessage = 'Registration successful! You can now log in.';
     }
 
@@ -637,8 +634,8 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
       const data = await response.json();
 
       if (response.ok) {
-        // Assume the backend returns user data, including their username
-        setLoggedInUser(data.user.username);
+        // Assume the backend returns user data, including their email
+        setLoggedInUser(data.user.email);
         setAppState('dashboard');
         setAlert({ message: successMessage, isSuccess: true });
       } else {
@@ -650,7 +647,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     }
   };
 
-  // A standalone modal component for the Terms & Conditions
   const TermsModal = () => (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6">
@@ -681,7 +677,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     </div>
   );
 
-  // Function to determine the correct form title based on state
   const renderTitle = () => {
     if (showForgotPassword) return 'Forgot Password';
     if (showOtpInput) return 'Verify OTP';
@@ -690,7 +685,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     return 'Create an Account';
   };
 
-  // Function to determine the correct form subtitle based on state
   const renderSubtitle = () => {
     if (showForgotPassword) return 'Enter your email to receive an OTP';
     if (showOtpInput) return 'Enter the OTP sent to your email';
@@ -699,7 +693,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     return 'Join our community today!';
   };
 
-  const renderForm = () => {
+  const renderForm = useCallback(() => {
     // Forgot Password - Step 1: Email Input
     if (showForgotPassword) {
       return (
@@ -726,7 +720,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
             type="button"
             onClick={() => {
               setShowForgotPassword(false);
-              setAlert(null); // Back to login view
+              setAlert(null);
               setIsLoginView(true);
             }}
             className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
@@ -839,6 +833,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
                 placeholder="e.g., Doe"
               />
             </div>
+            {/* The username field has been removed for registration */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Email Address</label>
               <input
@@ -851,20 +846,35 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
                 placeholder="e.g., john.doe@example.com"
               />
             </div>
+            {/* New Phone Number Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+              <input
+                type="tel" // Use 'tel' for better mobile keyboard support
+                name="phone"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                placeholder="e.g., +15551234567"
+              />
+            </div>
           </>
         )}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Username</label>
-          <input
-            type="text"
-            name="username"
-            required
-            value={formData.username}
-            onChange={handleChange}
-            className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-            placeholder="Enter your username"
-          />
-        </div>
+        {isLoginView && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+            <input
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              placeholder="Enter your email"
+            />
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700">Password</label>
           <input
@@ -883,7 +893,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
               type="button"
               onClick={() => {
                 setShowForgotPassword(true);
-                setAlert(null); // Clear alert on view change
+                setAlert(null);
               }}
               className="text-blue-600 hover:text-blue-800 transition-colors font-medium"
             >
@@ -922,13 +932,12 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
         </button>
       </form>
     );
-  };
+  }, [formData, isLoginView, agreedToTerms, handleForgotPasswordSubmit, handleOtpSubmit, handleNewPasswordSubmit, handleSubmit, setAlert, setShowForgotPassword, setShowOtpInput, setShowNewPasswordForm, setShowTermsModal, handleChange]);
 
 
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-100 font-sans antialiased flex items-center justify-center p-4">
-        {/* Tailwind CSS for fonts and basic styles, though a full build would use a CDN link or a local build process */}
         <style>
           {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -938,7 +947,6 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
           `}
         </style>
 
-        {/* Render the modal if showTermsModal is true */}
         {showTermsModal && <TermsModal />}
 
         <Card className="max-w-md">
@@ -956,7 +964,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
                 <button
                   onClick={() => {
                     setIsLoginView(!isLoginView);
-                    setAlert(null); // Clear alert on view change
+                    setAlert(null);
                   }}
                   className="text-blue-600 ml-1 hover:text-blue-800 transition-colors font-medium"
                 >
@@ -976,6 +984,7 @@ const AuthPage = ({ setAppState, setLoggedInUser, setAlert }) => {
     </ErrorBoundary>
   );
 };
+
 
 // NEW: Side Menu Panel Component
 const SideMenuPanel = ({ isOpen, onClose, onMenuItemClick }) => {
@@ -1555,7 +1564,7 @@ const Dashboard = ({ setAppState, loggedInUser, setAlert }) => {
     // Otherwise, render the main dashboard content
     return (
       <main className="container mx-auto px-4 py-8">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-6">Welcome back, {username}!</h2>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-6">Welcome back, {firstName}!</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Dashboard Section */}
           <div className="lg:col-span-2 space-y-8">
